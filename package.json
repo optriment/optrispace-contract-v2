@@ -1,0 +1,69 @@
+{
+  "name": "optrispace-contract-v2",
+  "version": "1.0.0",
+  "description": "OptriSpace Contracts",
+  "main": "hardhat.config.js",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "flatten": "npx hardhat flatten ./src/OptriSpace.sol",
+    "test": "hardhat test --bail",
+    "test_verbose": "hardhat test --bail --verbose",
+    "coverage": "npx hardhat coverage --network hardhat",
+    "lint": "npm run lint:es && npm run lint:js && npm run lint:sol && npx prettier --check .",
+    "lint:es": "npx eslint '**/*.js'",
+    "lint:js": "prettier test/**/*.js scripts/**/*.js --check",
+    "lint:sol": "solhint -f stylish src/**/*.sol -w 0",
+    "fix": "npm run fix:es && npm run fix:js && npm run fix:sol && npx prettier -w .",
+    "fix:es": "npx eslint '**/*.js' --fix",
+    "fix:js": "prettier test/**/*.js scripts/**/*.js --write",
+    "fix:sol": "solhint -f table --fix src/**/*.sol"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/optriment/optrispace-contract-v2.git"
+  },
+  "keywords": [
+    "web3",
+    "blockchain",
+    "smart contract",
+    "optrispace",
+    "freelance",
+    "decentralize",
+    "solidity",
+    "dao",
+    "binance smart chain"
+  ],
+  "author": "Alexander Kadyrov <gruz0.mail@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/optriment/optrispace-contract-v2/issues"
+  },
+  "homepage": "https://github.com/optriment/optrispace-contract-v2#readme",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.7",
+    "@nomiclabs/hardhat-ethers": "^2.2.1",
+    "@nomiclabs/hardhat-etherscan": "^3.1.5",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "@trivago/prettier-plugin-sort-imports": "^4.0.0",
+    "chai": "^4.3.7",
+    "dotenv": "^16.0.3",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-promise": "^5.2.0",
+    "ethereum-waffle": "^3.4.4",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.12.6",
+    "hardhat-contract-sizer": "^2.6.1",
+    "hardhat-gas-reporter": "^1.0.9",
+    "husky": "^8.0.3",
+    "prettier": "^2.8.1",
+    "prettier-plugin-solidity": "^1.1.1",
+    "solhint": "^3.3.7",
+    "solhint-plugin-prettier": "^0.0.5",
+    "solidity-coverage": "^0.8.2"
+  }
+}
