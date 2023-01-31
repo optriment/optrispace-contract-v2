@@ -266,7 +266,8 @@ describe('GigsAddJobCommand', async () => {
               categoryIndex: 0,
             })
 
-            expect(await optriSpace.getFrontendNodeClientsCount(frontendNodeAddress)).to.eq(1)
+            const frontendNode = await ethers.getContractAt('FrontendNode', frontendNodeAddress)
+            expect(await frontendNode.clientsCount()).to.eq(1)
           })
 
           it('adds a new event CLIENT_CREATED to frontend node', async () => {
@@ -278,7 +279,8 @@ describe('GigsAddJobCommand', async () => {
               categoryIndex: 0,
             })
 
-            const frontendNodeEvent = await optriSpace.getFrontendNodeEventByIndex(frontendNodeAddress, 0)
+            const frontendNode = await ethers.getContractAt('FrontendNode', frontendNodeAddress)
+            const frontendNodeEvent = await frontendNode.getEventByIndex(0)
             expect(+frontendNodeEvent.timestamp).to.be.above(new Date() / 1000)
             expect(frontendNodeEvent.eventType).to.eq('CLIENT_CREATED')
           })
@@ -295,7 +297,8 @@ describe('GigsAddJobCommand', async () => {
 
             // 1 - because:
             // index 0 used by CLIENT_CREATED event as a customer
-            const frontendNodeEvent = await optriSpace.getFrontendNodeEventByIndex(frontendNodeAddress, 1)
+            const frontendNode = await ethers.getContractAt('FrontendNode', frontendNodeAddress)
+            const frontendNodeEvent = await frontendNode.getEventByIndex(1)
             expect(+frontendNodeEvent.timestamp).to.be.above(new Date() / 1000)
             expect(frontendNodeEvent.eventType).to.eq('JOB_CREATED')
             expect(frontendNodeEvent.newRecordAddress).to.eq(newJobAddress)
@@ -337,14 +340,18 @@ describe('GigsAddJobCommand', async () => {
               const gigsStats = await gigsPlugin.gigsGetStats()
               expect(gigsStats.jobsCount).to.eq(2)
 
-              const event1 = await optriSpace.getFrontendNodeEventByIndex(frontendNodeAddress, 0)
+              const frontendNode1 = await ethers.getContractAt('FrontendNode', frontendNodeAddress)
+
+              const event1 = await frontendNode1.getEventByIndex(0)
               expect(event1.eventType).to.eq('CLIENT_CREATED')
 
-              const event2 = await optriSpace.getFrontendNodeEventByIndex(frontendNodeAddress, 1)
+              const event2 = await frontendNode1.getEventByIndex(1)
               expect(event2.eventType).to.eq('JOB_CREATED')
               expect(event2.newRecordAddress).to.eq(jobAddress1)
 
-              const event3 = await optriSpace.getFrontendNodeEventByIndex(frontendNodeAddress2, 0)
+              const frontendNode2 = await ethers.getContractAt('FrontendNode', frontendNodeAddress2)
+
+              const event3 = await frontendNode2.getEventByIndex(0)
               expect(event3.eventType).to.eq('JOB_CREATED')
               expect(event3.newRecordAddress).to.eq(jobAddress2)
             })
