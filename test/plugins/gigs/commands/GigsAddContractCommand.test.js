@@ -619,7 +619,8 @@ describe('GigsAddContractCommand', async () => {
                   daysToStartWork: 5,
                 })
 
-                expect(await optriSpace.getFrontendNodeClientsCount(frontendNodeAddress)).to.eq(2)
+                const frontendNode = await ethers.getContractAt('FrontendNode', frontendNodeAddress)
+                expect(await frontendNode.clientsCount()).to.eq(2)
               })
 
               it('adds a new event CONTRACT_CREATED to frontend node', async () => {
@@ -640,7 +641,9 @@ describe('GigsAddContractCommand', async () => {
                 // index 1 used by JOB_CREATED event
                 // index 2 used by CLIENT_CREATED event for freelancer
                 // index 3 used by APPLICATION_CREATED event
-                const frontendNodeEvent = await optriSpace.getFrontendNodeEventByIndex(frontendNodeAddress, 4)
+                const frontendNode = await ethers.getContractAt('FrontendNode', frontendNodeAddress)
+                const frontendNodeEvent = await frontendNode.getEventByIndex(4)
+
                 expect(+frontendNodeEvent.timestamp).to.be.above(new Date() / 1000)
                 expect(frontendNodeEvent.eventType).to.eq('CONTRACT_CREATED')
                 expect(frontendNodeEvent.newRecordAddress).to.eq(newContractAddress)
@@ -700,7 +703,8 @@ describe('GigsAddContractCommand', async () => {
                   })
                   const newContractAddress = await getContractAddressByTransaction(tx)
 
-                  const frontendNodeEvent = await optriSpace.getFrontendNodeEventByIndex(frontendNodeAddress2, 0)
+                  const frontendNode2 = await ethers.getContractAt('FrontendNode', frontendNodeAddress2)
+                  const frontendNodeEvent = await frontendNode2.getEventByIndex(0)
                   expect(+frontendNodeEvent.timestamp).to.be.above(new Date() / 1000)
                   expect(frontendNodeEvent.eventType).to.eq('CONTRACT_CREATED')
                   expect(frontendNodeEvent.newRecordAddress).to.eq(newContractAddress)

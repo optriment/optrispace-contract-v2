@@ -346,7 +346,8 @@ describe('GigsAddApplicationCommand', async () => {
               serviceFee: '0.01',
             })
 
-            expect(await optriSpace.getFrontendNodeClientsCount(frontendNodeAddress1)).to.eq(2)
+            const frontendNode = await ethers.getContractAt('FrontendNode', frontendNodeAddress1)
+            expect(await frontendNode.clientsCount()).to.eq(2)
           })
 
           it('adds a new event CLIENT_CREATED to frontend node', async () => {
@@ -360,7 +361,8 @@ describe('GigsAddApplicationCommand', async () => {
             // 2 - because:
             // index 0 used by CLIENT_CREATED event for a customer
             // index 1 used by JOB_CREATED event
-            const frontendNodeEvent = await optriSpace.getFrontendNodeEventByIndex(frontendNodeAddress1, 2)
+            const frontendNode = await ethers.getContractAt('FrontendNode', frontendNodeAddress1)
+            const frontendNodeEvent = await frontendNode.getEventByIndex(2)
             expect(+frontendNodeEvent.timestamp).to.be.above(new Date() / 1000)
             expect(frontendNodeEvent.eventType).to.eq('CLIENT_CREATED')
           })
@@ -378,7 +380,8 @@ describe('GigsAddApplicationCommand', async () => {
             // index 0 used by CLIENT_CREATED event for a customer
             // index 1 used by JOB_CREATED event
             // index 2 used by CLIENT_CREATED event for a freelancer
-            const frontendNodeEvent = await optriSpace.getFrontendNodeEventByIndex(frontendNodeAddress1, 3)
+            const frontendNode = await ethers.getContractAt('FrontendNode', frontendNodeAddress1)
+            const frontendNodeEvent = await frontendNode.getEventByIndex(3)
             expect(+frontendNodeEvent.timestamp).to.be.above(new Date() / 1000)
             expect(frontendNodeEvent.eventType).to.eq('APPLICATION_CREATED')
             expect(frontendNodeEvent.newRecordAddress).to.eq(newApplicationAddress)
@@ -403,8 +406,11 @@ describe('GigsAddApplicationCommand', async () => {
                 serviceFee: '0.01',
               })
 
-              expect(await optriSpace.getFrontendNodeClientsCount(frontendNodeAddress1)).to.eq(1)
-              expect(await optriSpace.getFrontendNodeClientsCount(frontendNodeAddress2)).to.eq(1)
+              const frontendNode1 = await ethers.getContractAt('FrontendNode', frontendNodeAddress1)
+              expect(await frontendNode1.clientsCount()).to.eq(1)
+
+              const frontendNode2 = await ethers.getContractAt('FrontendNode', frontendNodeAddress2)
+              expect(await frontendNode2.clientsCount()).to.eq(1)
             })
 
             it('adds a new event CLIENT_CREATED to another frontend node', async () => {
@@ -415,7 +421,8 @@ describe('GigsAddApplicationCommand', async () => {
                 serviceFee: '0.01',
               })
 
-              const frontendNodeEvent = await optriSpace.getFrontendNodeEventByIndex(frontendNodeAddress2, 0)
+              const frontendNode2 = await ethers.getContractAt('FrontendNode', frontendNodeAddress2)
+              const frontendNodeEvent = await frontendNode2.getEventByIndex(0)
               expect(+frontendNodeEvent.timestamp).to.be.above(new Date() / 1000)
               expect(frontendNodeEvent.eventType).to.eq('CLIENT_CREATED')
             })
@@ -431,7 +438,8 @@ describe('GigsAddApplicationCommand', async () => {
 
               // 1 - because:
               // index 0 used by CLIENT_CREATED event for freelancer
-              const frontendNodeEvent = await optriSpace.getFrontendNodeEventByIndex(frontendNodeAddress2, 1)
+              const frontendNode2 = await ethers.getContractAt('FrontendNode', frontendNodeAddress2)
+              const frontendNodeEvent = await frontendNode2.getEventByIndex(1)
               expect(+frontendNodeEvent.timestamp).to.be.above(new Date() / 1000)
               expect(frontendNodeEvent.eventType).to.eq('APPLICATION_CREATED')
               expect(frontendNodeEvent.newRecordAddress).to.eq(newApplicationAddress)

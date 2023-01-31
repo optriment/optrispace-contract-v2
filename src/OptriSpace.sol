@@ -94,16 +94,4 @@ contract OptriSpace is IOptriSpace {
         stats.nodeOwnersCount = s.nodeOwnersCount;
         stats.frontendNodesCount = s.frontendNodesCount;
     }
-
-    function getFrontendNodeClientsCount(address frontendNodeAddress) external view returns (uint256) {
-        return LibAppStorage.findFrontendNode(frontendNodeAddress).clientsCount();
-    }
-
-    /// Only for testing purpose
-    function getFrontendNodeEventByIndex(
-        address frontendNodeAddress,
-        uint256 index
-    ) external view returns (FrontendNodeEventValue memory frontendNodeEvent) {
-        return LibAppStorage.findFrontendNode(frontendNodeAddress).getEventByIndex(index);
-    }
 }
