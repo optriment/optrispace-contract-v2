@@ -84,6 +84,10 @@ const coreAddFrontendNodeTx = async (contract, as, args = {}) => {
   return await contract.connect(as).coreAddFrontendNode(args.frontendNodeOwnerAddress, args.frontendNodeName)
 }
 
+const coreGetStats = async (contract) => {
+  return await contract.coreGetStats()
+}
+
 module.exports = {
   deployFacet,
   expectRevert,
@@ -95,4 +99,5 @@ module.exports = {
   getFrontendNodeOwnerContractAddressByTransaction,
   coreAddFrontendNode,
   coreAddFrontendNodeTx,
+  coreGetStats,
 }

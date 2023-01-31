@@ -11,20 +11,12 @@ pragma solidity 0.8.17;
 
 import {LibDiamond} from "./core/libraries/LibDiamond.sol";
 import {IDiamondCut} from "./core/interfaces/IDiamondCut.sol";
-import {AppStorage, LibAppStorage, FrontendNode, NodeOwner} from "./core/libraries/LibAppStorage.sol";
 
 import "./core/interfaces/IOptriSpace.sol";
 
 contract OptriSpace is IOptriSpace {
     /// Used by frontend to check is this a contract or not
     string public constant VERSION = "1.0.0";
-
-    // Logs out created frontend node record
-    event FrontendNodeCreated(
-        address nodeOwnerAddress,
-        address nodeOwnerContractAddress,
-        address newFrontendNodeAddress
-    );
 
     error FunctionDoesNotExist();
 
@@ -85,13 +77,5 @@ contract OptriSpace is IOptriSpace {
 
     receive() external payable {
         revert("PaymentsDisabled()");
-    }
-
-    function getStats() external view returns (StatsValue memory stats) {
-        AppStorage storage s = LibAppStorage.appStorage();
-
-        stats.membersCount = s.membersCount;
-        stats.nodeOwnersCount = s.nodeOwnersCount;
-        stats.frontendNodesCount = s.frontendNodesCount;
     }
 }

@@ -36,7 +36,7 @@ describe('GigsContractsService', async () => {
   let gigsContractsService
 
   // Signers
-  let owner // eslint-disable-line no-unused-vars
+  let owner
   let customer
   let freelancer
   let other

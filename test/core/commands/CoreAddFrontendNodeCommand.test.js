@@ -8,6 +8,7 @@ const {
   getFrontendNodeOwnerContractAddressByTransaction,
   coreAddFrontendNodeTx,
   coreAddFrontendNode,
+  coreGetStats,
 } = require('../../helpers')
 
 const { deployDiamond } = require('../../../scripts/deploy.js')
@@ -16,12 +17,11 @@ describe('CoreAddFrontendNodeCommand', async () => {
   // NOTE: We use this to simulate contract which is not an EOA.
   let CONTRACT_WITH_CODE
 
-  let optriSpace
   let diamondAddress
   let diamondCutFacet
 
   // Signers
-  let owner // eslint-disable-line no-unused-vars
+  let owner
   let frontendNodeOwner
 
   before(async () => {
@@ -37,8 +37,6 @@ describe('CoreAddFrontendNodeCommand', async () => {
 
     diamondAddress = await deployDiamond()
     diamondCutFacet = await ethers.getContractAt('DiamondCutFacet', diamondAddress)
-
-    optriSpace = await ethers.getContractAt('OptriSpace', diamondAddress)
   })
 
   describe('coreAddFrontendNode', async () => {
@@ -47,12 +45,14 @@ describe('CoreAddFrontendNodeCommand', async () => {
     })
 
     describe('Access to contract through Diamond', async () => {
-      let coreAddFrontendNodeCommand
+      let coreAddFrontendNodeCommand, coreGetStatsQuery
 
       beforeEach(async () => {
         await deployFacet(diamondCutFacet, 'CoreAddFrontendNodeCommand')
-
         coreAddFrontendNodeCommand = await ethers.getContractAt('CoreAddFrontendNodeCommand', diamondAddress)
+
+        await deployFacet(diamondCutFacet, 'CoreGetStatsQuery')
+        coreGetStatsQuery = await ethers.getContractAt('CoreGetStatsQuery', diamondAddress)
       })
 
       describe('when executes as not a contract owner', async () => {
@@ -124,7 +124,7 @@ describe('CoreAddFrontendNodeCommand', async () => {
           frontendNodeName: 'domain2.tld',
         })
 
-        const stats = await optriSpace.getStats()
+        const stats = await coreGetStats(coreGetStatsQuery)
         expect(stats.membersCount).to.eq(0)
         expect(stats.nodeOwnersCount).to.eq(1)
         expect(stats.frontendNodesCount).to.eq(2)

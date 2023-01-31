@@ -58,157 +58,133 @@ describe('OptriSpace', async () => {
   })
 
   describe('core', async () => {
-    it('adds functions', async () => {
-      const { selectors: coreAddFrontendNodeCommandSelectors, address: coreAddFrontendNodeCommandAddress } =
-        await deployFacet(diamondCutFacet, 'CoreAddFrontendNodeCommand')
+    it('adds CoreAddFrontendNodeCommand', async () => {
+      const { selectors, address } = await deployFacet(diamondCutFacet, 'CoreAddFrontendNodeCommand')
 
-      const result = await diamondLoupeFacet.facetFunctionSelectors(coreAddFrontendNodeCommandAddress)
-      assert.sameMembers(result, coreAddFrontendNodeCommandSelectors)
+      const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+      assert.sameMembers(result, selectors)
+    })
+
+    it('adds CoreGetStatsQuery', async () => {
+      const { selectors, address } = await deployFacet(diamondCutFacet, 'CoreGetStatsQuery')
+
+      const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+      assert.sameMembers(result, selectors)
     })
   })
 
   describe('plugins', async () => {
     describe('Gigs', async () => {
-      it('adds functions', async () => {
-        let result
+      it('adds GigsPlugin', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsPlugin')
 
-        // GigsPlugin
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
 
-        const { selectors: gigsPluginSelectors, address: gigsPluginAddress } = await deployFacet(
-          diamondCutFacet,
-          'GigsPlugin'
-        )
+      it('adds GigsCustomerService', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsCustomerService')
 
-        result = await diamondLoupeFacet.facetFunctionSelectors(gigsPluginAddress)
-        assert.sameMembers(result, gigsPluginSelectors)
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
 
-        // GigsCustomerService
+      it('adds GigsFreelancerService', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsFreelancerService')
 
-        const { selectors: gigsCustomerServiceSelectors, address: gigsCustomerServiceAddress } = await deployFacet(
-          diamondCutFacet,
-          'GigsCustomerService'
-        )
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
 
-        result = await diamondLoupeFacet.facetFunctionSelectors(gigsCustomerServiceAddress)
-        assert.sameMembers(result, gigsCustomerServiceSelectors)
+      it('adds GigsContractsService', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsContractsService')
 
-        // GigsFreelancerService
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
 
-        const { selectors: gigsFreelancerServiceSelectors, address: gigsFreelancerServiceAddress } = await deployFacet(
-          diamondCutFacet,
-          'GigsFreelancerService'
-        )
+      it('adds GigsGetMyApplicationsQuery', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsGetMyApplicationsQuery')
 
-        result = await diamondLoupeFacet.facetFunctionSelectors(gigsFreelancerServiceAddress)
-        assert.sameMembers(result, gigsFreelancerServiceSelectors)
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
 
-        // GigsContractsService
+      it('adds GigsAddJobCommand', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsAddJobCommand')
 
-        const { selectors: gigsContractsServiceSelectors, address: gigsContractsServiceAddress } = await deployFacet(
-          diamondCutFacet,
-          'GigsContractsService'
-        )
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
 
-        result = await diamondLoupeFacet.facetFunctionSelectors(gigsContractsServiceAddress)
-        assert.sameMembers(result, gigsContractsServiceSelectors)
+      it('adds GigsAddApplicationCommand', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsAddApplicationCommand')
 
-        // GigsGetMyApplicationsQuery
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
 
-        const { selectors: gigsGetMyApplicationsQuerySelectors, address: gigsGetMyApplicationsQueryAddress } =
-          await deployFacet(diamondCutFacet, 'GigsGetMyApplicationsQuery')
+      it('adds GigsAddContractCommand', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsAddContractCommand')
 
-        result = await diamondLoupeFacet.facetFunctionSelectors(gigsGetMyApplicationsQueryAddress)
-        assert.sameMembers(result, gigsGetMyApplicationsQuerySelectors)
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
 
-        // GigsAddJobCommand
+      it('adds GigsAcceptContractCommand', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsAcceptContractCommand')
 
-        const { selectors: gigsAddJobCommandSelectors, address: gigsAddJobCommandAddress } = await deployFacet(
-          diamondCutFacet,
-          'GigsAddJobCommand'
-        )
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
 
-        result = await diamondLoupeFacet.facetFunctionSelectors(gigsAddJobCommandAddress)
-        assert.sameMembers(result, gigsAddJobCommandSelectors)
+      it('adds GigsFundContractCommand', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsFundContractCommand')
 
-        // GigsAddApplicationCommand
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
 
-        const { selectors: gigsAddApplicationCommandSelectors, address: gigsAddApplicationCommandAddress } =
-          await deployFacet(diamondCutFacet, 'GigsAddApplicationCommand')
+      it('adds GigsStartContractCommand', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsStartContractCommand')
 
-        result = await diamondLoupeFacet.facetFunctionSelectors(gigsAddApplicationCommandAddress)
-        assert.sameMembers(result, gigsAddApplicationCommandSelectors)
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
 
-        // GigsAddContractCommand
+      it('adds GigsDeliverContractCommand', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsDeliverContractCommand')
 
-        const { selectors: gigsAddContractCommandSelectors, address: gigsAddContractCommandAddress } =
-          await deployFacet(diamondCutFacet, 'GigsAddContractCommand')
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
 
-        result = await diamondLoupeFacet.facetFunctionSelectors(gigsAddContractCommandAddress)
-        assert.sameMembers(result, gigsAddContractCommandSelectors)
+      it('adds GigsApproveContractCommand', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsApproveContractCommand')
 
-        // GigsAcceptContractCommand
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
 
-        const { selectors: gigsAcceptContractCommandSelectors, address: gigsAcceptContractCommandAddress } =
-          await deployFacet(diamondCutFacet, 'GigsAcceptContractCommand')
+      it('adds GigsDeclineContractCommand', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsDeclineContractCommand')
 
-        result = await diamondLoupeFacet.facetFunctionSelectors(gigsAcceptContractCommandAddress)
-        assert.sameMembers(result, gigsAcceptContractCommandSelectors)
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
 
-        // GigsFundContractCommand
+      it('adds GigsWithdrawContractCommand', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsWithdrawContractCommand')
 
-        const { selectors: gigsFundContractCommandSelectors, address: gigsFundContractCommandAddress } =
-          await deployFacet(diamondCutFacet, 'GigsFundContractCommand')
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
 
-        result = await diamondLoupeFacet.facetFunctionSelectors(gigsFundContractCommandAddress)
-        assert.sameMembers(result, gigsFundContractCommandSelectors)
+      it('adds GigsRefundContractCommand', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsRefundContractCommand')
 
-        // GigsStartContractCommand
-
-        const { selectors: gigsStartContractCommandSelectors, address: gigsStartContractCommandAddress } =
-          await deployFacet(diamondCutFacet, 'GigsStartContractCommand')
-
-        result = await diamondLoupeFacet.facetFunctionSelectors(gigsStartContractCommandAddress)
-        assert.sameMembers(result, gigsStartContractCommandSelectors)
-
-        // GigsDeliverContractCommand
-
-        const { selectors: gigsDeliverContractCommandSelectors, address: gigsDeliverContractCommandAddress } =
-          await deployFacet(diamondCutFacet, 'GigsDeliverContractCommand')
-
-        result = await diamondLoupeFacet.facetFunctionSelectors(gigsDeliverContractCommandAddress)
-        assert.sameMembers(result, gigsDeliverContractCommandSelectors)
-
-        // GigsApproveContractCommand
-
-        const { selectors: gigsApproveContractCommandSelectors, address: gigsApproveContractCommandAddress } =
-          await deployFacet(diamondCutFacet, 'GigsApproveContractCommand')
-
-        result = await diamondLoupeFacet.facetFunctionSelectors(gigsApproveContractCommandAddress)
-        assert.sameMembers(result, gigsApproveContractCommandSelectors)
-
-        // GigsDeclineContractCommand
-
-        const { selectors: gigsDeclineContractCommandSelectors, address: gigsDeclineContractCommandAddress } =
-          await deployFacet(diamondCutFacet, 'GigsDeclineContractCommand')
-
-        result = await diamondLoupeFacet.facetFunctionSelectors(gigsDeclineContractCommandAddress)
-        assert.sameMembers(result, gigsDeclineContractCommandSelectors)
-
-        // GigsWithdrawContractCommand
-
-        const { selectors: gigsWithdrawContractCommandSelectors, address: gigsWithdrawContractCommandAddress } =
-          await deployFacet(diamondCutFacet, 'GigsWithdrawContractCommand')
-
-        result = await diamondLoupeFacet.facetFunctionSelectors(gigsWithdrawContractCommandAddress)
-        assert.sameMembers(result, gigsWithdrawContractCommandSelectors)
-
-        // GigsRefundContractCommand
-
-        const { selectors: gigsRefundContractCommandSelectors, address: gigsRefundContractCommandAddress } =
-          await deployFacet(diamondCutFacet, 'GigsRefundContractCommand')
-
-        result = await diamondLoupeFacet.facetFunctionSelectors(gigsRefundContractCommandAddress)
-        assert.sameMembers(result, gigsRefundContractCommandSelectors)
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
       })
     })
   })

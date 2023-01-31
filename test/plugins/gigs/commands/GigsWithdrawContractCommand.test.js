@@ -38,7 +38,7 @@ describe('GigsWithdrawContractCommand', async () => {
   let diamondCutFacet
 
   // Signers
-  let owner // eslint-disable-line no-unused-vars
+  let owner
   let customer
   let freelancer
   let other

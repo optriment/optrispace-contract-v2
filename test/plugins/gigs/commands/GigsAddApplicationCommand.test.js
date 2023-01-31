@@ -5,6 +5,7 @@ const {
   expectRevert,
   getFrontendNodeAddressByTransaction,
   coreAddFrontendNodeTx,
+  coreGetStats,
 } = require('../../../helpers')
 
 const {
@@ -27,7 +28,7 @@ describe('GigsAddApplicationCommand', async () => {
   let diamondCutFacet
 
   // Signers
-  let owner // eslint-disable-line no-unused-vars
+  let owner
   let customer
   let freelancer
   let someone
@@ -228,10 +229,11 @@ describe('GigsAddApplicationCommand', async () => {
         })
 
         describe('when job exists', async () => {
-          let optriSpace, gigsPlugin, jobAddress
+          let coreGetStatsQuery, gigsPlugin, jobAddress
 
           beforeEach(async () => {
-            optriSpace = await ethers.getContractAt('OptriSpace', diamondAddress)
+            await deployFacet(diamondCutFacet, 'CoreGetStatsQuery')
+            coreGetStatsQuery = await ethers.getContractAt('CoreGetStatsQuery', diamondAddress)
 
             await deployFacet(diamondCutFacet, 'GigsPlugin')
             gigsPlugin = await ethers.getContractAt('GigsPlugin', diamondAddress)
@@ -316,7 +318,7 @@ describe('GigsAddApplicationCommand', async () => {
             })
 
             // Customer + other
-            const stats = await optriSpace.getStats()
+            const stats = await coreGetStats(coreGetStatsQuery)
             expect(stats.membersCount).to.eq(2)
           })
 
