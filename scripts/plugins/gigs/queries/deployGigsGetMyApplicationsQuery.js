@@ -1,7 +1,7 @@
-const { deployFacet } = require('../../libraries/deployFacet.js')
+const { deployFacet } = require('../../../libraries/deployFacet.js')
 
 const deploy = async (args = {}) => {
-  await deployFacet('GigsPlugin', args)
+  await deployFacet('GigsGetMyApplicationsQuery', args)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
@@ -13,4 +13,4 @@ if (require.main === module) {
   })
 }
 
-exports.deployGigsPlugin = deploy
+exports.deployGigsGetMyApplicationsQuery = deploy

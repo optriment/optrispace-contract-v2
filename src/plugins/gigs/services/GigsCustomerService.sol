@@ -18,7 +18,8 @@ contract GigsCustomerService is IGigsCustomerService {
     function gigsGetMyJobs() external view returns (GigsJobEntity[] memory jobs) {
         AppStorage storage s = LibAppStorage.appStorage();
 
-        uint256 myJobsCount = s.gigsMemberJobs[msg.sender].length;
+        address[] memory memberJobs = s.gigsMemberJobs[msg.sender];
+        uint256 myJobsCount = memberJobs.length;
 
         jobs = new GigsJobEntity[](myJobsCount);
 
@@ -26,7 +27,7 @@ contract GigsCustomerService is IGigsCustomerService {
 
         while (i < myJobsCount) {
             unchecked {
-                jobs[i] = s.gigsJobs[s.gigsJobIndexByAddress[s.gigsMemberJobs[msg.sender][i]]];
+                jobs[i] = s.gigsJobs[s.gigsJobIndexByAddress[memberJobs[i]]];
                 ++i;
             }
         }
@@ -47,7 +48,8 @@ contract GigsCustomerService is IGigsCustomerService {
 
         if (!s.gigsMemberJobExists[msg.sender][jobAddress]) return applications;
 
-        uint256 jobApplicationsCount = s.gigsJobApplications[jobAddress].length;
+        address[] memory jobApplications = s.gigsJobApplications[jobAddress];
+        uint256 jobApplicationsCount = jobApplications.length;
 
         applications = new GigsApplicationEntity[](jobApplicationsCount);
 
@@ -55,7 +57,7 @@ contract GigsCustomerService is IGigsCustomerService {
 
         while (i < jobApplicationsCount) {
             unchecked {
-                applications[i] = s.gigsJobApplications[jobAddress][i];
+                applications[i] = s.gigsApplications[jobApplications[i]];
                 ++i;
             }
         }
@@ -80,9 +82,7 @@ contract GigsCustomerService is IGigsCustomerService {
 
         if (s.gigsContractByJobAndApplicationExists[jobAddress][applicationAddress]) revert ContractExists();
 
-        address applicantAddress = s.gigsJobApplicant[jobAddress][applicationAddress];
-        uint256 index = s.gigsJobApplicationsMapping[jobAddress][applicantAddress];
-        GigsApplicationEntity memory application = s.gigsJobApplications[jobAddress][index];
+        GigsApplicationEntity memory application = s.gigsApplications[applicationAddress];
 
         return
             GigsJobWithApplicationValue({
@@ -100,7 +100,8 @@ contract GigsCustomerService is IGigsCustomerService {
     function gigsGetContractsAsCustomer() external view returns (GigsContractEntity[] memory contracts) {
         AppStorage storage s = LibAppStorage.appStorage();
 
-        uint256 myContractsCount = s.gigsMemberContractsAsCustomer[msg.sender].length;
+        address[] memory myContracts = s.gigsMemberContractsAsCustomer[msg.sender];
+        uint256 myContractsCount = myContracts.length;
 
         contracts = new GigsContractEntity[](myContractsCount);
 
@@ -108,7 +109,7 @@ contract GigsCustomerService is IGigsCustomerService {
 
         while (i < myContractsCount) {
             unchecked {
-                contracts[i] = s.gigsContracts[s.gigsMemberContractsAsCustomer[msg.sender][i]];
+                contracts[i] = s.gigsContracts[myContracts[i]];
                 ++i;
             }
         }

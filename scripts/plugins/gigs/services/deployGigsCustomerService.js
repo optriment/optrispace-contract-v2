@@ -1,50 +1,16 @@
-/* global ethers */
+const { deployFacet } = require('../../../libraries/deployFacet.js')
 
-const { getSelectors, FacetCutAction } = require('../../../libraries/diamond.js')
-
-const DIAMOND_ADDRESS = process.env.DIAMOND_ADDRESS
-
-const deployGigsCustomerService = async (args = {}) => {
-  if (typeof DIAMOND_ADDRESS === 'undefined' || DIAMOND_ADDRESS.toString().trim().length === 0) {
-    throw new Error('Invalid DIAMOND_ADDRESS')
-  }
-
-  const diamondCutFacet = await ethers.getContractAt('DiamondCutFacet', DIAMOND_ADDRESS)
-
-  const GigsCustomerServiceFacet = await ethers.getContractFactory('GigsCustomerService')
-  const gigsCustomerServiceFacet = await GigsCustomerServiceFacet.deploy()
-  await gigsCustomerServiceFacet.deployed()
-
-  const customerServiceSelectors = getSelectors(gigsCustomerServiceFacet)
-
-  const tx = await diamondCutFacet.diamondCut(
-    [
-      {
-        facetAddress: gigsCustomerServiceFacet.address,
-        action: FacetCutAction.Add,
-        functionSelectors: customerServiceSelectors,
-      },
-    ],
-    ethers.constants.AddressZero,
-    '0x',
-    { gasLimit: 800000 }
-  )
-  const receipt = await tx.wait()
-
-  if (!receipt.status) {
-    throw Error(`Diamond upgrade failed: ${tx.hash}`)
-  }
-
-  if (args.verbose) console.log('GigsCustomerService deployed')
+const deploy = async (args = {}) => {
+  await deployFacet('GigsCustomerService', args)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 if (require.main === module) {
-  deployGigsCustomerService({ verbose: true }).catch((error) => {
+  deploy({ verbose: true }).catch((error) => {
     console.error(error)
     process.exitCode = 1
   })
 }
 
-exports.deployGigsCustomerService = deployGigsCustomerService
+exports.deployGigsCustomerService = deploy

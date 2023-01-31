@@ -288,7 +288,7 @@ describe('GigsFreelancerService', async () => {
         const contractAddress = await getContractAddressByTransaction(tx)
 
         const contracts = await gigsGetContractsAsContractor(gigsFreelancerService, freelancer)
-        expect(contracts.length).to.eql(1)
+        expect(contracts.length).to.eq(1)
 
         const myContract = contracts[0]
         expect(myContract.id).to.eq(contractAddress)

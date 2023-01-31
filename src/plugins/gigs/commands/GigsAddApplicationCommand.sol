@@ -56,23 +56,23 @@ contract GigsAddApplicationCommand is IGigsAddApplicationCommand {
 
         address newApplicationAddress = address(application);
 
+        s.gigsApplications[newApplicationAddress] = GigsApplicationEntity({
+            id: newApplicationAddress,
+            jobAddress: jobAddress,
+            applicantAddress: applicantAddress,
+            comment: comment,
+            serviceFee: serviceFee,
+            createdAt: uint64(block.timestamp), // solhint-disable-line not-rely-on-time
+            hasContract: false,
+            contractAddress: address(0)
+        });
+
         s.gigsJobApplicationExists[jobAddress][newApplicationAddress] = true;
         s.gigsJobApplicationsMapping[jobAddress][applicantAddress] = s.gigsJobApplications[jobAddress].length;
         s.gigsJobApplicantExists[jobAddress][applicantAddress] = true;
         s.gigsJobApplicant[jobAddress][newApplicationAddress] = applicantAddress;
-
-        s.gigsJobApplications[jobAddress].push(
-            GigsApplicationEntity({
-                id: newApplicationAddress,
-                jobAddress: jobAddress,
-                applicantAddress: applicantAddress,
-                comment: comment,
-                serviceFee: serviceFee,
-                createdAt: uint64(block.timestamp), // solhint-disable-line not-rely-on-time
-                hasContract: false,
-                contractAddress: address(0)
-            })
-        );
+        s.gigsMemberApplications[applicantAddress].push(newApplicationAddress);
+        s.gigsJobApplications[jobAddress].push(newApplicationAddress);
 
         job.applicationsCount++;
         s.gigsApplicationsCount++;

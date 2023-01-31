@@ -29,14 +29,17 @@ contract GigsFreelancerService is IGigsFreelancerService {
 
         if (!s.gigsJobApplicantExists[jobAddress][msg.sender]) return (false, dto);
 
-        uint256 index = s.gigsJobApplicationsMapping[jobAddress][msg.sender];
-        return (true, s.gigsJobApplications[jobAddress][index]);
+        uint256 applicationIndex = s.gigsJobApplicationsMapping[jobAddress][msg.sender];
+        address applicationAddress = s.gigsJobApplications[jobAddress][applicationIndex];
+
+        return (true, s.gigsApplications[applicationAddress]);
     }
 
     function gigsGetContractsAsContractor() external view returns (GigsContractEntity[] memory contracts) {
         AppStorage storage s = LibAppStorage.appStorage();
 
-        uint256 myContractsCount = s.gigsMemberContractsAsContractor[msg.sender].length;
+        address[] memory myContracts = s.gigsMemberContractsAsContractor[msg.sender];
+        uint256 myContractsCount = myContracts.length;
 
         contracts = new GigsContractEntity[](myContractsCount);
 
@@ -44,7 +47,7 @@ contract GigsFreelancerService is IGigsFreelancerService {
 
         while (i < myContractsCount) {
             unchecked {
-                contracts[i] = s.gigsContracts[s.gigsMemberContractsAsContractor[msg.sender][i]];
+                contracts[i] = s.gigsContracts[myContracts[i]];
                 ++i;
             }
         }

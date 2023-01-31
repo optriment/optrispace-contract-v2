@@ -47,9 +47,10 @@ struct AppStorage {
     // Gigs Applications
     //
     uint256 gigsApplicationsCount;
+    mapping(address => GigsApplicationEntity) gigsApplications;
     // Key - job address, subkey - application address
     mapping(address => mapping(address => bool)) gigsJobApplicationExists;
-    mapping(address => GigsApplicationEntity[]) gigsJobApplications;
+    mapping(address => address[]) gigsJobApplications;
     mapping(address => mapping(address => uint256)) gigsJobApplicationsMapping;
     // Key - job address, subkey - applicant address
     mapping(address => mapping(address => bool)) gigsJobApplicantExists;
