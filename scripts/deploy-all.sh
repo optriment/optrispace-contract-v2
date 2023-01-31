@@ -42,6 +42,10 @@ echo "Deploying CoreAddFrontendNodeCommand..."
 npx hardhat run scripts/core/commands/deployCoreAddFrontendNodeCommand.js --network "${NETWORK}"
 echo ""
 
+echo "Deploying CoreGetStatsQuery..."
+npx hardhat run scripts/core/queries/deployCoreGetStatsQuery.js --network "${NETWORK}"
+echo ""
+
 export FRONTEND_NODE_OWNER="${CONTRACT_OWNER:?}"
 export FRONTEND_NODE_NAME="example.tld"
 
