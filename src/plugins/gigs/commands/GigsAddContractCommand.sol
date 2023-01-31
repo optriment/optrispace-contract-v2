@@ -78,8 +78,7 @@ contract GigsAddContractCommand is IGigsAddContractCommand {
 
         if (s.gigsContractByJobAndApplicationExists[jobAddress][applicationAddress]) revert ContractExists();
 
-        uint256 index = s.gigsJobApplicationsMapping[jobAddress][s.gigsJobApplicant[jobAddress][applicationAddress]];
-        GigsApplicationEntity storage application = s.gigsJobApplications[jobAddress][index];
+        GigsApplicationEntity storage application = s.gigsApplications[applicationAddress];
 
         address newContractAddress = _deployContract(
             jobAddress,

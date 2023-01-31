@@ -112,6 +112,14 @@ describe('OptriSpace', async () => {
         result = await diamondLoupeFacet.facetFunctionSelectors(gigsContractsServiceAddress)
         assert.sameMembers(result, gigsContractsServiceSelectors)
 
+        // GigsGetMyApplicationsQuery
+
+        const { selectors: gigsGetMyApplicationsQuerySelectors, address: gigsGetMyApplicationsQueryAddress } =
+          await deployFacet(diamondCutFacet, 'GigsGetMyApplicationsQuery')
+
+        result = await diamondLoupeFacet.facetFunctionSelectors(gigsGetMyApplicationsQueryAddress)
+        assert.sameMembers(result, gigsGetMyApplicationsQuerySelectors)
+
         // GigsAddJobCommand
 
         const { selectors: gigsAddJobCommandSelectors, address: gigsAddJobCommandAddress } = await deployFacet(

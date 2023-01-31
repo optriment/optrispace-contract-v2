@@ -145,6 +145,10 @@ const gigsGetMyApplication = async (contract, as, args = {}) => {
   return await contract.connect(as).gigsGetMyApplication(args.jobAddress)
 }
 
+const gigsGetMyApplications = async (contract, as) => {
+  return await contract.connect(as).gigsGetMyApplications()
+}
+
 const gigsGetContract = async (contract, as, args = {}) => {
   return await contract.connect(as).gigsGetContract(args.contractAddress)
 }
@@ -191,6 +195,7 @@ module.exports = {
   gigsGetMyJobs,
   gigsGetApplications,
   gigsGetMyApplication,
+  gigsGetMyApplications,
   gigsGetContract,
   gigsGetJobAndApplicationForContract,
   gigsGetContractsAsCustomer,
