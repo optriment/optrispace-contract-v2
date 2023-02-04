@@ -26,6 +26,7 @@ const {
   gigsWithdrawContract,
   gigsRefundContract,
   gigsGetContract,
+  gigsGetFreelancer,
   addDaysToTimestamp,
 } = require('../helpers')
 
@@ -295,19 +296,20 @@ describe('GigsDeliverContractCommand', async () => {
               })
 
               describe('when contract is started', async () => {
-                let gigsContractsService
+                let gigsContractsService, gigsGetFreelancerQuery
 
                 beforeEach(async () => {
                   await deployFacet(diamondCutFacet, 'GigsContractsService')
-
                   gigsContractsService = await ethers.getContractAt('GigsContractsService', diamondAddress)
 
                   await deployFacet(diamondCutFacet, 'GigsStartContractCommand')
-
                   const gigsStartContractCommand = await ethers.getContractAt(
                     'GigsStartContractCommand',
                     diamondAddress
                   )
+
+                  await deployFacet(diamondCutFacet, 'GigsGetFreelancerQuery')
+                  gigsGetFreelancerQuery = await ethers.getContractAt('GigsGetFreelancerQuery', diamondAddress)
 
                   await gigsStartContract(gigsStartContractCommand, freelancer, { contractAddress: contractAddress })
                 })
@@ -405,6 +407,38 @@ describe('GigsDeliverContractCommand', async () => {
                     expect(await contract.getStatus()).to.eq('delivered')
 
                     expect(await ethers.provider.getBalance(contractAddress)).to.eq(ethers.utils.parseEther('0.02'))
+                  })
+
+                  it('updates freelancer activity timestamp', async () => {
+                    const { dto: before } = await gigsGetFreelancer(gigsGetFreelancerQuery, {
+                      freelancerAddress: freelancer.address,
+                    })
+                    expect(before.id).to.eq(freelancer.address)
+
+                    const lastActivityAtBefore = +before.lastActivityAt
+
+                    await gigsDeliverContract(gigsDeliverContractCommand, freelancer, {
+                      contractAddress: contractAddress,
+                    })
+
+                    const { dto: after } = await gigsGetFreelancer(gigsGetFreelancerQuery, {
+                      freelancerAddress: freelancer.address,
+                    })
+                    expect(after.id).to.eq(freelancer.address)
+                    expect(+after.lastActivityAt).to.be.above(lastActivityAtBefore)
+                  })
+
+                  it('does not increase succeeded and failed contracts in Freelancer profile', async () => {
+                    await gigsDeliverContract(gigsDeliverContractCommand, freelancer, {
+                      contractAddress: contractAddress,
+                    })
+
+                    const { dto } = await gigsGetFreelancer(gigsGetFreelancerQuery, {
+                      freelancerAddress: freelancer.address,
+                    })
+                    expect(dto.id).to.eq(freelancer.address)
+                    expect(dto.succeededContractsCount).to.eq(0)
+                    expect(dto.failedContractsCount).to.eq(0)
                   })
                 })
 

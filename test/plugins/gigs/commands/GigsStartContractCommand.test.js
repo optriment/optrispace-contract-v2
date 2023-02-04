@@ -26,6 +26,7 @@ const {
   gigsWithdrawContract,
   gigsRefundContract,
   gigsGetContract,
+  gigsGetFreelancer,
   addDaysToTimestamp,
 } = require('../helpers')
 
@@ -282,10 +283,14 @@ describe('GigsStartContractCommand', async () => {
             })
 
             describe('when contract is funded', async () => {
+              let gigsGetFreelancerQuery
+
               beforeEach(async () => {
                 await deployFacet(diamondCutFacet, 'GigsFundContractCommand')
-
                 const gigsFundContractCommand = await ethers.getContractAt('GigsFundContractCommand', diamondAddress)
+
+                await deployFacet(diamondCutFacet, 'GigsGetFreelancerQuery')
+                gigsGetFreelancerQuery = await ethers.getContractAt('GigsGetFreelancerQuery', diamondAddress)
 
                 await gigsFundContract(gigsFundContractCommand, customer, {
                   contractAddress: contractAddress,
@@ -385,6 +390,38 @@ describe('GigsStartContractCommand', async () => {
 
                   expect(await ethers.provider.getBalance(contractAddress)).to.eq(ethers.utils.parseEther('0.02'))
                 })
+
+                it('updates freelancer activity timestamp', async () => {
+                  const { dto: before } = await gigsGetFreelancer(gigsGetFreelancerQuery, {
+                    freelancerAddress: freelancer.address,
+                  })
+                  expect(before.id).to.eq(freelancer.address)
+
+                  const lastActivityAtBefore = +before.lastActivityAt
+
+                  await gigsStartContract(gigsStartContractCommand, freelancer, {
+                    contractAddress: contractAddress,
+                  })
+
+                  const { dto: after } = await gigsGetFreelancer(gigsGetFreelancerQuery, {
+                    freelancerAddress: freelancer.address,
+                  })
+                  expect(after.id).to.eq(freelancer.address)
+                  expect(+after.lastActivityAt).to.be.above(lastActivityAtBefore)
+                })
+
+                it('does not increase succeeded and failed contracts in Freelancer profile', async () => {
+                  await gigsStartContract(gigsStartContractCommand, freelancer, {
+                    contractAddress: contractAddress,
+                  })
+
+                  const { dto } = await gigsGetFreelancer(gigsGetFreelancerQuery, {
+                    freelancerAddress: freelancer.address,
+                  })
+                  expect(dto.id).to.eq(freelancer.address)
+                  expect(dto.succeededContractsCount).to.eq(0)
+                  expect(dto.failedContractsCount).to.eq(0)
+                })
               })
 
               describe('when work started in two days after', async () => {
@@ -440,6 +477,31 @@ describe('GigsStartContractCommand', async () => {
                   expect(await contract.getStatus()).to.eq('started')
 
                   expect(await ethers.provider.getBalance(contractAddress)).to.eq(ethers.utils.parseEther('0.02'))
+
+                  await snapshot.restore()
+                })
+
+                it('updates freelancer activity timestamp', async () => {
+                  const { dto: before } = await gigsGetFreelancer(gigsGetFreelancerQuery, {
+                    freelancerAddress: freelancer.address,
+                  })
+                  expect(before.id).to.eq(freelancer.address)
+
+                  const lastActivityAtBefore = +before.lastActivityAt
+
+                  const snapshot = await helpers.takeSnapshot()
+
+                  await helpers.time.increase(2 * 24 * 60 * 60)
+
+                  await gigsStartContract(gigsStartContractCommand, freelancer, {
+                    contractAddress: contractAddress,
+                  })
+
+                  const { dto: after } = await gigsGetFreelancer(gigsGetFreelancerQuery, {
+                    freelancerAddress: freelancer.address,
+                  })
+                  expect(after.id).to.eq(freelancer.address)
+                  expect(+after.lastActivityAt).to.be.above(lastActivityAtBefore)
 
                   await snapshot.restore()
                 })

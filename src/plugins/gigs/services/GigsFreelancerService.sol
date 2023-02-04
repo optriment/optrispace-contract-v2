@@ -5,6 +5,7 @@ import {LibDiamond} from "../../../core/libraries/LibDiamond.sol";
 import {AppStorage, LibAppStorage} from "../../../core/libraries/LibAppStorage.sol";
 import {LibEvents} from "../../../core/libraries/LibEvents.sol";
 
+import {GigsFreelancerEntity} from "../entities/GigsFreelancerEntity.sol";
 import {GigsApplicationContract} from "../contracts/GigsApplicationContract.sol";
 
 import "../interfaces/IGigsFreelancerService.sol";
@@ -38,16 +39,20 @@ contract GigsFreelancerService is IGigsFreelancerService {
     function gigsGetContractsAsContractor() external view returns (GigsContractEntity[] memory contracts) {
         AppStorage storage s = LibAppStorage.appStorage();
 
-        address[] memory myContracts = s.gigsMemberContractsAsContractor[msg.sender];
-        uint256 myContractsCount = myContracts.length;
+        if (!s.gigsFreelancerExists[msg.sender]) return contracts;
+
+        GigsFreelancerEntity memory freelancer = s.gigsFreelancers[s.gigsFreelancerIndexByAddress[msg.sender]];
+
+        uint256 myContractsCount = freelancer.myContracts.length;
 
         contracts = new GigsContractEntity[](myContractsCount);
 
         uint256 i = 0;
 
         while (i < myContractsCount) {
+            contracts[i] = s.gigsContracts[freelancer.myContracts[i]];
+
             unchecked {
-                contracts[i] = s.gigsContracts[myContracts[i]];
                 ++i;
             }
         }

@@ -5,4 +5,11 @@ set -eu
 
 make lint
 
+echo "Checking for presence of asserts in contracts..."
+
+if grep -r assert src; then
+  echo "Assertions exist in code! Please remove it."
+  exit 1
+fi
+
 exit 0

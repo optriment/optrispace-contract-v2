@@ -2,9 +2,10 @@
 pragma solidity 0.8.17;
 
 import {LibDiamond} from "../../../core/libraries/LibDiamond.sol";
-import {AppStorage, FrontendNode, Member, LibAppStorage} from "../../../core/libraries/LibAppStorage.sol";
+import {AppStorage, FrontendNode, PersonEntity, LibAppStorage} from "../../../core/libraries/LibAppStorage.sol";
 import {LibEvents} from "../../../core/libraries/LibEvents.sol";
 
+import {GigsFreelancerEntity} from "../entities/GigsFreelancerEntity.sol";
 import {GigsApplicationContract} from "../contracts/GigsApplicationContract.sol";
 
 import "../interfaces/IGigsAddApplicationCommand.sol";
@@ -47,19 +48,31 @@ contract GigsAddApplicationCommand is IGigsAddApplicationCommand {
 
         GigsJobEntity storage job = s.gigsJobs[s.gigsJobIndexByAddress[jobAddress]];
 
-        address applicantAddress = msg.sender;
+        if (job.customerAddress == msg.sender) revert ApplicantsOnly();
+        if (s.gigsJobApplicantExists[jobAddress][msg.sender]) revert AlreadyApplied();
 
-        if (job.customerAddress == applicantAddress) revert ApplicantsOnly();
-        if (s.gigsJobApplicantExists[jobAddress][applicantAddress]) revert AlreadyApplied();
-
-        GigsApplicationContract application = new GigsApplicationContract(jobAddress, applicantAddress);
+        GigsApplicationContract application = new GigsApplicationContract(jobAddress, msg.sender);
 
         address newApplicationAddress = address(application);
+
+        emit ApplicationCreated(msg.sender, jobAddress, newApplicationAddress);
+
+        (bool personCreated, PersonEntity storage person) = LibAppStorage.findOrCreatePerson(msg.sender);
+
+        if (personCreated) {
+            frontendNode.addClient(msg.sender);
+        } else {
+            person.lastActivityAt = uint64(block.timestamp);
+        }
+
+        GigsFreelancerEntity storage freelancer = LibAppStorage.findOrCreateFreelancer(msg.sender);
+
+        freelancer.myApplications.push(newApplicationAddress);
 
         s.gigsApplications[newApplicationAddress] = GigsApplicationEntity({
             id: newApplicationAddress,
             jobAddress: jobAddress,
-            applicantAddress: applicantAddress,
+            applicantAddress: msg.sender,
             comment: comment,
             serviceFee: serviceFee,
             createdAt: uint64(block.timestamp), // solhint-disable-line not-rely-on-time
@@ -68,21 +81,13 @@ contract GigsAddApplicationCommand is IGigsAddApplicationCommand {
         });
 
         s.gigsJobApplicationExists[jobAddress][newApplicationAddress] = true;
-        s.gigsJobApplicationsMapping[jobAddress][applicantAddress] = s.gigsJobApplications[jobAddress].length;
-        s.gigsJobApplicantExists[jobAddress][applicantAddress] = true;
-        s.gigsJobApplicant[jobAddress][newApplicationAddress] = applicantAddress;
-        s.gigsMemberApplications[applicantAddress].push(newApplicationAddress);
+        s.gigsJobApplicationsMapping[jobAddress][msg.sender] = s.gigsJobApplications[jobAddress].length;
+        s.gigsJobApplicantExists[jobAddress][msg.sender] = true;
+        s.gigsJobApplicant[jobAddress][newApplicationAddress] = msg.sender;
         s.gigsJobApplications[jobAddress].push(newApplicationAddress);
 
         job.applicationsCount++;
         s.gigsApplicationsCount++;
-
-        emit ApplicationCreated(applicantAddress, jobAddress, newApplicationAddress);
-
-        (bool memberCreated, Member member) = LibAppStorage.findOrCreateMember(applicantAddress);
-        if (memberCreated) {
-            frontendNode.addClient(address(member));
-        }
 
         frontendNode.addEvent(LibEvents.EVENT_APPLICATION_CREATED, newApplicationAddress);
     }

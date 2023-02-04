@@ -6,6 +6,8 @@ import {AppStorage, FrontendNode, LibAppStorage} from "../../../core/libraries/L
 import {LibEvents} from "../../../core/libraries/LibEvents.sol";
 
 import {GigsContractContract} from "../contracts/GigsContractContract.sol";
+import {GigsCustomerEntity} from "../entities/GigsCustomerEntity.sol";
+import {GigsFreelancerEntity} from "../entities/GigsFreelancerEntity.sol";
 
 import "../interfaces/IGigsAddContractCommand.sol";
 
@@ -90,6 +92,11 @@ contract GigsAddContractCommand is IGigsAddContractCommand {
 
         emit ContractCreated(msg.sender, jobAddress, applicationAddress, newContractAddress);
 
+        LibAppStorage.updatePersonActivity(msg.sender);
+
+        addContractToCustomer(msg.sender, newContractAddress);
+        addContractToFreelancer(application.applicantAddress, newContractAddress);
+
         s.gigsContracts[newContractAddress] = GigsContractEntity({
             id: newContractAddress,
             jobAddress: jobAddress,
@@ -120,9 +127,6 @@ contract GigsAddContractCommand is IGigsAddContractCommand {
         application.hasContract = true;
         application.contractAddress = newContractAddress;
 
-        s.gigsMemberContractsAsCustomer[msg.sender].push(newContractAddress);
-        s.gigsMemberContractsAsContractor[application.applicantAddress].push(newContractAddress);
-
         s.gigsContractByJobAndApplicationExists[jobAddress][applicationAddress] = true;
         s.gigsContractIdByJobAndApplication[jobAddress][applicationAddress] = newContractAddress;
 
@@ -149,5 +153,17 @@ contract GigsAddContractCommand is IGigsAddContractCommand {
         );
 
         newContractAddress = address(newContract);
+    }
+
+    function addContractToCustomer(address customerAddress, address contractAddress) private {
+        GigsCustomerEntity storage customer = LibAppStorage.findCustomer(customerAddress);
+
+        customer.myContracts.push(contractAddress);
+    }
+
+    function addContractToFreelancer(address freelancerAddress, address contractAddress) private {
+        GigsFreelancerEntity storage freelancer = LibAppStorage.findFreelancer(freelancerAddress);
+
+        freelancer.myContracts.push(contractAddress);
     }
 }

@@ -33,6 +33,8 @@ contract GigsFundContractCommand is IGigsFundContractCommand, GigsAbstractContra
         dto.fundedAt = uint64(block.timestamp); // solhint-disable-line not-rely-on-time
         dto.workShouldBeStartedBefore = workShouldBeStartedBefore;
         dto.resultShouldBeDeliveredBefore = resultShouldBeDeliveredBefore;
+
+        updatePersonActivity(dto.customerAddress);
     }
 
     function _addDaysToTimestamp(uint value) private view returns (uint64) {

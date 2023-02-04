@@ -16,14 +16,14 @@ contract FrontendNode {
 
     error InvalidNodeOwnerAddress();
     error InvalidOwner();
-    error InvalidMemberAddress();
+    error InvalidPersonAddress();
     error DisplayNameRequired();
     error OnlyIssuer();
 
     FrontendNodeEventValue[] public events;
     mapping(string => uint256) public eventsCountByType;
 
-    // Key - Member address, not an EOA, value - timestamp
+    // Key - Person address (EOA), value - timestamp
     mapping(address => uint64) private _clients;
     mapping(address => bool) private _clientExists;
     uint256 public clientsCount;
@@ -65,19 +65,19 @@ contract FrontendNode {
         eventsCount[3] = eventsCountByType[LibEvents.EVENT_CONTRACT_CREATED];
     }
 
-    function addClient(address memberContractAddress) external {
-        if (memberContractAddress == address(0)) revert InvalidMemberAddress();
+    function addClient(address personAddress) external {
+        if (personAddress == address(0)) revert InvalidPersonAddress();
         if (msg.sender != issuer) revert OnlyIssuer();
 
-        _enforceHasContractCode(memberContractAddress, "MemberMustHaveCode()");
+        _enforceEOA(personAddress, "PersonMustBeEOA()");
 
-        if (_clientExists[memberContractAddress]) return;
+        if (_clientExists[personAddress]) return;
 
-        _clients[memberContractAddress] = uint64(block.timestamp); // solhint-disable-line not-rely-on-time
-        _clientExists[memberContractAddress] = true;
+        _clients[personAddress] = uint64(block.timestamp); // solhint-disable-line not-rely-on-time
+        _clientExists[personAddress] = true;
         clientsCount++;
 
-        _addEvent(LibEvents.EVENT_CLIENT_CREATED, memberContractAddress);
+        _addEvent(LibEvents.EVENT_CLIENT_CREATED, personAddress);
     }
 
     function _addEvent(string memory eventType, address newRecordAddress) private {
@@ -101,5 +101,17 @@ contract FrontendNode {
         }
         // solhint-enable no-inline-assembly
         require(contractSize > 0, _errorMessage);
+    }
+
+    function _enforceEOA(address _address, string memory _errorMessage) private view {
+        uint256 contractSize;
+        // solhint-disable no-inline-assembly
+        // slither-disable-next-line assembly
+        assembly {
+            contractSize := extcodesize(_address)
+        }
+        // solhint-enable no-inline-assembly
+
+        require(contractSize == 0, _errorMessage);
     }
 }

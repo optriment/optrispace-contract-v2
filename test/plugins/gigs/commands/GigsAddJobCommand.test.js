@@ -8,7 +8,15 @@ const {
   coreGetStats,
 } = require('../../../helpers')
 
-const { getJobAddressByTransaction, gigsAddJobsCategory, gigsAddJob, gigsAddJobTx } = require('../helpers')
+const {
+  getJobAddressByTransaction,
+  gigsAddJobsCategory,
+  gigsAddJob,
+  gigsAddJobTx,
+  gigsGetCustomers,
+  gigsGetCustomer,
+  gigsGetMyCustomerProfile,
+} = require('../helpers')
 
 const { deployDiamond } = require('../../../../scripts/deploy.js')
 
@@ -188,7 +196,7 @@ describe('GigsAddJobCommand', async () => {
         })
 
         describe('with jobs categories', async () => {
-          let coreGetStatsQuery, gigsPlugin
+          let coreGetStatsQuery, gigsPlugin, gigsGetCustomersQuery, gigsGetCustomerQuery, gigsGetMyCustomerProfileQuery
 
           beforeEach(async () => {
             await deployFacet(diamondCutFacet, 'CoreGetStatsQuery')
@@ -196,6 +204,15 @@ describe('GigsAddJobCommand', async () => {
 
             await deployFacet(diamondCutFacet, 'GigsPlugin')
             gigsPlugin = await ethers.getContractAt('GigsPlugin', diamondAddress)
+
+            await deployFacet(diamondCutFacet, 'GigsGetCustomersQuery')
+            gigsGetCustomersQuery = await ethers.getContractAt('GigsGetCustomersQuery', diamondAddress)
+
+            await deployFacet(diamondCutFacet, 'GigsGetCustomerQuery')
+            gigsGetCustomerQuery = await ethers.getContractAt('GigsGetCustomerQuery', diamondAddress)
+
+            await deployFacet(diamondCutFacet, 'GigsGetMyCustomerProfileQuery')
+            gigsGetMyCustomerProfileQuery = await ethers.getContractAt('GigsGetMyCustomerProfileQuery', diamondAddress)
 
             await gigsAddJobsCategory(gigsPlugin, owner, { categoryCode: 'code', categoryLabel: 'label' })
           })
@@ -226,7 +243,7 @@ describe('GigsAddJobCommand', async () => {
             expect(stats.jobsCount).to.eq(1)
           })
 
-          it('adds a new member', async () => {
+          it('adds a new person', async () => {
             await gigsAddJob(gigsAddJobCommand, customer, {
               frontendNodeAddress: frontendNodeAddress,
               budget: '0.01',
@@ -236,7 +253,116 @@ describe('GigsAddJobCommand', async () => {
             })
 
             const stats = await coreGetStats(coreGetStatsQuery)
-            expect(stats.membersCount).to.eq(1)
+            expect(stats.peopleCount).to.eq(1)
+          })
+
+          describe('when person does not have Customer profile yet', async () => {
+            let jobAddress
+
+            beforeEach(async () => {
+              const tx = await gigsAddJobTx(gigsAddJobCommand, customer, {
+                frontendNodeAddress: frontendNodeAddress,
+                budget: '0.01',
+                title: 'title',
+                description: 'description',
+                categoryIndex: 0,
+              })
+
+              jobAddress = await getJobAddressByTransaction(tx)
+            })
+
+            it('adds a new customer', async () => {
+              const stats = await gigsPlugin.gigsGetStats()
+              expect(stats.customersCount).to.eq(1)
+            })
+
+            it('returns a created customer from gigsGetCustomersQuery', async () => {
+              const customers = await gigsGetCustomers(gigsGetCustomersQuery)
+              expect(customers.length).to.eq(1)
+
+              expect(customers[0].id).to.eq(customer.address)
+              expect(customers[0].displayName).to.eq('')
+              expect(customers[0].totalContractsCount).to.eq(0)
+              expect(customers[0].lastActivityAt).to.be.above(0)
+            })
+
+            it('creates a Customer profile', async () => {
+              const { exists, profile } = await gigsGetMyCustomerProfile(gigsGetMyCustomerProfileQuery, customer)
+              expect(exists).to.eq(true)
+
+              expect(profile.owner).to.eq(customer.address)
+              expect(profile.myJobs).to.eql([jobAddress])
+              expect(profile.myContracts).to.eql([])
+            })
+          })
+
+          describe('when person has Customer profile', async () => {
+            let firstJobAddress, secondJobAddress
+
+            beforeEach(async () => {
+              const tx1 = await gigsAddJobTx(gigsAddJobCommand, customer, {
+                frontendNodeAddress: frontendNodeAddress,
+                budget: '0.01',
+                title: 'title',
+                description: 'description',
+                categoryIndex: 0,
+              })
+
+              firstJobAddress = await getJobAddressByTransaction(tx1)
+            })
+
+            it('does not add a new customer', async () => {
+              await gigsAddJob(gigsAddJobCommand, customer, {
+                frontendNodeAddress: frontendNodeAddress,
+                budget: '0.02',
+                title: 'title2',
+                description: 'description2',
+                categoryIndex: 0,
+              })
+
+              const stats = await gigsPlugin.gigsGetStats()
+              expect(stats.customersCount).to.eq(1)
+            })
+
+            it('adds a new job to profile', async () => {
+              const tx = await gigsAddJobTx(gigsAddJobCommand, customer, {
+                frontendNodeAddress: frontendNodeAddress,
+                budget: '0.02',
+                title: 'title2',
+                description: 'description2',
+                categoryIndex: 0,
+              })
+
+              secondJobAddress = await getJobAddressByTransaction(tx)
+
+              const { exists, profile } = await gigsGetMyCustomerProfile(gigsGetMyCustomerProfileQuery, customer)
+              expect(exists).to.eq(true)
+
+              expect(profile.myJobs).to.eql([firstJobAddress, secondJobAddress])
+            })
+
+            it('updates person activity timestamp', async () => {
+              const { dto: before } = await gigsGetCustomer(gigsGetCustomerQuery, {
+                customerAddress: customer.address,
+              })
+              expect(before.id).to.eq(customer.address)
+
+              const lastActivityAtBefore = +before.lastActivityAt
+
+              await gigsAddJob(gigsAddJobCommand, customer, {
+                frontendNodeAddress: frontendNodeAddress,
+                budget: '0.02',
+                title: 'title2',
+                description: 'description2',
+                categoryIndex: 0,
+              })
+
+              const { dto: after } = await gigsGetCustomer(gigsGetCustomerQuery, {
+                customerAddress: customer.address,
+              })
+              expect(after.id).to.eq(customer.address)
+              expect(+after.lastActivityAt).to.be.above(lastActivityAtBefore)
+            })
           })
 
           it('emits event JobCreated', async () => {
@@ -306,6 +432,22 @@ describe('GigsAddJobCommand', async () => {
             expect(frontendNodeEvent.newRecordAddress).to.eq(newJobAddress)
           })
 
+          it('connects to a created contract', async () => {
+            const tx = await gigsAddJobTx(gigsAddJobCommand, customer, {
+              frontendNodeAddress: frontendNodeAddress,
+              budget: '0.01',
+              title: 'title',
+              description: 'description',
+              categoryIndex: 0,
+            })
+            const newJobAddress = await getJobAddressByTransaction(tx)
+
+            const contract = await ethers.getContractAt('GigsJobContract', newJobAddress)
+            expect(await contract.version()).to.eq(1)
+            expect(await contract.deployerAddress()).to.eq(diamondAddress)
+            expect(await contract.customerAddress()).to.eq(customer.address)
+          })
+
           describe('when added another job as the customer on the second node', async () => {
             let frontendNodeAddress2
 
@@ -337,7 +479,7 @@ describe('GigsAddJobCommand', async () => {
               const jobAddress2 = await getJobAddressByTransaction(tx2)
 
               const stats = await coreGetStats(coreGetStatsQuery)
-              expect(stats.membersCount).to.eq(1)
+              expect(stats.peopleCount).to.eq(1)
 
               const gigsStats = await gigsPlugin.gigsGetStats()
               expect(gigsStats.jobsCount).to.eq(2)

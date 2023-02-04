@@ -2,10 +2,11 @@
 pragma solidity 0.8.17;
 
 import {LibDiamond} from "../../../core/libraries/LibDiamond.sol";
-import {AppStorage, FrontendNode, Member, LibAppStorage} from "../../../core/libraries/LibAppStorage.sol";
+import {AppStorage, FrontendNode, PersonEntity, LibAppStorage} from "../../../core/libraries/LibAppStorage.sol";
 import {LibEvents} from "../../../core/libraries/LibEvents.sol";
 
 import {GigsJobContract} from "../contracts/GigsJobContract.sol";
+import {GigsCustomerEntity} from "../entities/GigsCustomerEntity.sol";
 
 import "../interfaces/IGigsAddJobCommand.sol";
 
@@ -42,13 +43,11 @@ contract GigsAddJobCommand is IGigsAddJobCommand {
         if (s.gigsJobsCategoriesCount == 0) revert NoCategories();
         if (categoryIndex > (s.gigsJobsCategoriesCount - 1)) revert InvalidCategoryIndex();
 
-        address customerAddress = msg.sender;
-
-        GigsJobContract job = new GigsJobContract(customerAddress);
+        GigsJobContract job = new GigsJobContract(msg.sender);
 
         address newJobAddress = address(job);
 
-        emit JobCreated(customerAddress, newJobAddress);
+        emit JobCreated(msg.sender, newJobAddress);
 
         GigsJobCategoryValue memory category = s.gigsJobsCategories[categoryIndex];
 
@@ -57,7 +56,7 @@ contract GigsAddJobCommand is IGigsAddJobCommand {
         s.gigsJobIndexByAddress[newJobAddress] = newIndex;
         s.gigsJobs[newIndex] = GigsJobEntity({
             id: newJobAddress,
-            customerAddress: customerAddress,
+            customerAddress: msg.sender,
             title: title,
             description: description,
             budget: budget,
@@ -68,14 +67,19 @@ contract GigsAddJobCommand is IGigsAddJobCommand {
         });
         s.gigsJobsCount++;
 
-        s.gigsMemberJobs[customerAddress].push(newJobAddress);
-        s.gigsMemberJobExists[customerAddress][newJobAddress] = true;
+        s.gigsCustomerJobExists[msg.sender][newJobAddress] = true;
 
-        (bool memberCreated, Member member) = LibAppStorage.findOrCreateMember(customerAddress);
+        (bool personCreated, PersonEntity storage person) = LibAppStorage.findOrCreatePerson(msg.sender);
 
-        if (memberCreated) {
-            frontendNode.addClient(address(member));
+        if (personCreated) {
+            frontendNode.addClient(msg.sender);
+        } else {
+            person.lastActivityAt = uint64(block.timestamp);
         }
+
+        GigsCustomerEntity storage customer = LibAppStorage.findOrCreateCustomer(msg.sender);
+
+        customer.myJobs.push(newJobAddress);
 
         frontendNode.addEvent(LibEvents.EVENT_JOB_CREATED, newJobAddress);
     }

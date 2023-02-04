@@ -125,7 +125,7 @@ describe('CoreAddFrontendNodeCommand', async () => {
         })
 
         const stats = await coreGetStats(coreGetStatsQuery)
-        expect(stats.membersCount).to.eq(0)
+        expect(stats.peopleCount).to.eq(0)
         expect(stats.nodeOwnersCount).to.eq(1)
         expect(stats.frontendNodesCount).to.eq(2)
       })

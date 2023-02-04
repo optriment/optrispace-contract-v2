@@ -16,6 +16,9 @@ const {
   gigsAddApplication,
   gigsAddApplicationTx,
   gigsGetJob,
+  gigsGetFreelancers,
+  gigsGetFreelancer,
+  gigsGetMyFreelancerProfile,
 } = require('../helpers')
 
 const { deployDiamond } = require('../../../../scripts/deploy.js')
@@ -229,7 +232,13 @@ describe('GigsAddApplicationCommand', async () => {
         })
 
         describe('when job exists', async () => {
-          let coreGetStatsQuery, gigsPlugin, jobAddress
+          let gigsAddJobCommand,
+            coreGetStatsQuery,
+            gigsPlugin,
+            gigsGetFreelancersQuery,
+            gigsGetFreelancerQuery,
+            gigsGetMyFreelancerProfileQuery,
+            jobAddress
 
           beforeEach(async () => {
             await deployFacet(diamondCutFacet, 'CoreGetStatsQuery')
@@ -239,7 +248,19 @@ describe('GigsAddApplicationCommand', async () => {
             gigsPlugin = await ethers.getContractAt('GigsPlugin', diamondAddress)
 
             await deployFacet(diamondCutFacet, 'GigsAddJobCommand')
-            const gigsAddJobCommand = await ethers.getContractAt('GigsAddJobCommand', diamondAddress)
+            gigsAddJobCommand = await ethers.getContractAt('GigsAddJobCommand', diamondAddress)
+
+            await deployFacet(diamondCutFacet, 'GigsGetFreelancersQuery')
+            gigsGetFreelancersQuery = await ethers.getContractAt('GigsGetFreelancersQuery', diamondAddress)
+
+            await deployFacet(diamondCutFacet, 'GigsGetFreelancerQuery')
+            gigsGetFreelancerQuery = await ethers.getContractAt('GigsGetFreelancerQuery', diamondAddress)
+
+            await deployFacet(diamondCutFacet, 'GigsGetMyFreelancerProfileQuery')
+            gigsGetMyFreelancerProfileQuery = await ethers.getContractAt(
+              'GigsGetMyFreelancerProfileQuery',
+              diamondAddress
+            )
 
             await gigsAddJobsCategory(gigsPlugin, owner, { categoryCode: 'code', categoryLabel: 'label' })
 
@@ -309,7 +330,7 @@ describe('GigsAddApplicationCommand', async () => {
             expect(stats.applicationsCount).to.eq(1)
           })
 
-          it('adds a new member', async () => {
+          it('adds a new person', async () => {
             await gigsAddApplication(gigsAddApplicationCommand, freelancer, {
               frontendNodeAddress: frontendNodeAddress1,
               jobAddress: jobAddress,
@@ -319,7 +340,124 @@ describe('GigsAddApplicationCommand', async () => {
 
             // Customer + other
             const stats = await coreGetStats(coreGetStatsQuery)
-            expect(stats.membersCount).to.eq(2)
+            expect(stats.peopleCount).to.eq(2)
+          })
+
+          describe('when person does not have Freelancer profile yet', async () => {
+            let applicationAddress
+
+            beforeEach(async () => {
+              const tx = await gigsAddApplicationTx(gigsAddApplicationCommand, freelancer, {
+                frontendNodeAddress: frontendNodeAddress1,
+                jobAddress: jobAddress,
+                comment: 'comment2',
+                serviceFee: '0.03',
+              })
+
+              applicationAddress = await getApplicationAddressByTransaction(tx)
+            })
+
+            it('adds a new freelancer', async () => {
+              const stats = await gigsPlugin.gigsGetStats()
+              expect(stats.freelancersCount).to.eq(1)
+            })
+
+            it('returns a created freelancer from gigsGetFreelancersQuery', async () => {
+              const freelancers = await gigsGetFreelancers(gigsGetFreelancersQuery)
+              expect(freelancers.length).to.eq(1)
+
+              expect(freelancers[0].id).to.eq(freelancer.address)
+              expect(freelancers[0].displayName).to.eq('')
+              expect(freelancers[0].about).to.eq('')
+              expect(freelancers[0].totalContractsCount).to.eq(0)
+              expect(freelancers[0].succeededContractsCount).to.eq(0)
+              expect(freelancers[0].failedContractsCount).to.eq(0)
+              expect(freelancers[0].lastActivityAt).to.be.above(0)
+            })
+
+            it('creates a Freelancer profile', async () => {
+              const { exists, profile } = await gigsGetMyFreelancerProfile(gigsGetMyFreelancerProfileQuery, freelancer)
+              expect(exists).to.eq(true)
+
+              expect(profile.owner).to.eq(freelancer.address)
+              expect(profile.about).to.eq('')
+              expect(profile.myApplications).to.eql([applicationAddress])
+              expect(profile.myContracts).to.eql([])
+              expect(+profile.failedContractsCount).to.eq(0)
+              expect(+profile.succeededContractsCount).to.eq(0)
+            })
+          })
+
+          describe('when person has Freelancer profile', async () => {
+            let firstApplicationAddress
+
+            beforeEach(async () => {
+              const tx1 = await gigsAddJobTx(gigsAddJobCommand, customer, {
+                frontendNodeAddress: frontendNodeAddress1,
+                budget: '0.02',
+                title: 'title2',
+                description: 'description2',
+                categoryIndex: 0,
+              })
+              const anotherJobAddress = await getJobAddressByTransaction(tx1)
+
+              const tx2 = await gigsAddApplicationTx(gigsAddApplicationCommand, freelancer, {
+                frontendNodeAddress: frontendNodeAddress1,
+                jobAddress: anotherJobAddress,
+                comment: 'comment2',
+                serviceFee: '0.02',
+              })
+              firstApplicationAddress = await getApplicationAddressByTransaction(tx2)
+            })
+
+            it('does not add a new freelancer', async () => {
+              await gigsAddApplication(gigsAddApplicationCommand, freelancer, {
+                frontendNodeAddress: frontendNodeAddress1,
+                jobAddress: jobAddress,
+                comment: 'comment2',
+                serviceFee: '0.02',
+              })
+
+              const stats = await gigsPlugin.gigsGetStats()
+              expect(stats.freelancersCount).to.eq(1)
+            })
+
+            it('adds a new application to profile', async () => {
+              const tx = await gigsAddApplicationTx(gigsAddApplicationCommand, freelancer, {
+                frontendNodeAddress: frontendNodeAddress1,
+                jobAddress: jobAddress,
+                comment: 'comment2',
+                serviceFee: '0.02',
+              })
+              const secondApplicationAddress = await getApplicationAddressByTransaction(tx)
+
+              const { exists, profile } = await gigsGetMyFreelancerProfile(gigsGetMyFreelancerProfileQuery, freelancer)
+              expect(exists).to.eq(true)
+
+              expect(profile.myApplications).to.eql([firstApplicationAddress, secondApplicationAddress])
+            })
+
+            it('updates person activity timestamp', async () => {
+              const { dto: before } = await gigsGetFreelancer(gigsGetFreelancerQuery, {
+                freelancerAddress: freelancer.address,
+              })
+              expect(before.id).to.eq(freelancer.address)
+
+              const lastActivityAtBefore = +before.lastActivityAt
+
+              await gigsAddApplication(gigsAddApplicationCommand, freelancer, {
+                frontendNodeAddress: frontendNodeAddress1,
+                jobAddress: jobAddress,
+                comment: 'comment2',
+                serviceFee: '0.02',
+              })
+
+              const { dto: after } = await gigsGetFreelancer(gigsGetFreelancerQuery, {
+                freelancerAddress: freelancer.address,
+              })
+              expect(after.id).to.eq(freelancer.address)
+              expect(+after.lastActivityAt).to.be.above(lastActivityAtBefore)
+            })
           })
 
           it('emits event ApplicationCreated', async () => {
@@ -387,6 +525,22 @@ describe('GigsAddApplicationCommand', async () => {
             expect(+frontendNodeEvent.timestamp).to.be.above(new Date() / 1000)
             expect(frontendNodeEvent.eventType).to.eq('APPLICATION_CREATED')
             expect(frontendNodeEvent.newRecordAddress).to.eq(newApplicationAddress)
+          })
+
+          it('connects to a created contract', async () => {
+            const tx = await gigsAddApplicationTx(gigsAddApplicationCommand, freelancer, {
+              frontendNodeAddress: frontendNodeAddress1,
+              jobAddress: jobAddress,
+              comment: 'comment',
+              serviceFee: '0.01',
+            })
+            const newApplicationAddress = await getApplicationAddressByTransaction(tx)
+
+            const contract = await ethers.getContractAt('GigsApplicationContract', newApplicationAddress)
+            expect(await contract.version()).to.eq(1)
+            expect(await contract.deployerAddress()).to.eq(diamondAddress)
+            expect(await contract.jobAddress()).to.eq(jobAddress)
+            expect(await contract.applicantAddress()).to.eq(freelancer.address)
           })
 
           describe('when freelancer applied from another node', async () => {
