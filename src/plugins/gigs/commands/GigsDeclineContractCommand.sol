@@ -25,5 +25,7 @@ contract GigsDeclineContractCommand is IGigsDeclineContractCommand, GigsAbstract
 
         dto.status = "declined";
         dto.declinedAt = uint64(block.timestamp); // solhint-disable-line not-rely-on-time
+
+        updatePersonActivity(dto.customerAddress);
     }
 }

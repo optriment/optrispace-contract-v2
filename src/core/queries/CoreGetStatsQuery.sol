@@ -9,7 +9,7 @@ contract CoreGetStatsQuery is ICoreGetStatsQuery {
     function coreGetStats() external view returns (StatsValue memory stats) {
         AppStorage storage s = LibAppStorage.appStorage();
 
-        stats.membersCount = s.membersCount;
+        stats.peopleCount = s.peopleCount;
         stats.nodeOwnersCount = s.nodeOwnersCount;
         stats.frontendNodesCount = s.frontendNodesCount;
     }

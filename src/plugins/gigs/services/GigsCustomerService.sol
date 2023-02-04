@@ -2,8 +2,9 @@
 pragma solidity 0.8.17;
 
 import {LibDiamond} from "../../../core/libraries/LibDiamond.sol";
-import {AppStorage, FrontendNode, Member, LibAppStorage} from "../../../core/libraries/LibAppStorage.sol";
+import {AppStorage, FrontendNode, LibAppStorage} from "../../../core/libraries/LibAppStorage.sol";
 import {LibEvents} from "../../../core/libraries/LibEvents.sol";
+import {GigsCustomerEntity} from "../entities/GigsCustomerEntity.sol";
 
 import "../interfaces/IGigsCustomerService.sol";
 
@@ -18,16 +19,20 @@ contract GigsCustomerService is IGigsCustomerService {
     function gigsGetMyJobs() external view returns (GigsJobEntity[] memory jobs) {
         AppStorage storage s = LibAppStorage.appStorage();
 
-        address[] memory memberJobs = s.gigsMemberJobs[msg.sender];
-        uint256 myJobsCount = memberJobs.length;
+        if (!s.gigsCustomerExists[msg.sender]) return jobs;
+
+        GigsCustomerEntity memory customer = s.gigsCustomers[s.gigsCustomerIndexByAddress[msg.sender]];
+
+        uint256 myJobsCount = customer.myJobs.length;
 
         jobs = new GigsJobEntity[](myJobsCount);
 
         uint256 i = 0;
 
         while (i < myJobsCount) {
+            jobs[i] = s.gigsJobs[s.gigsJobIndexByAddress[customer.myJobs[i]]];
+
             unchecked {
-                jobs[i] = s.gigsJobs[s.gigsJobIndexByAddress[memberJobs[i]]];
                 ++i;
             }
         }
@@ -46,7 +51,7 @@ contract GigsCustomerService is IGigsCustomerService {
 
         if (job.customerAddress != msg.sender) revert CustomerOnly();
 
-        if (!s.gigsMemberJobExists[msg.sender][jobAddress]) return applications;
+        if (!s.gigsCustomerJobExists[msg.sender][jobAddress]) return applications;
 
         address[] memory jobApplications = s.gigsJobApplications[jobAddress];
         uint256 jobApplicationsCount = jobApplications.length;
@@ -100,16 +105,20 @@ contract GigsCustomerService is IGigsCustomerService {
     function gigsGetContractsAsCustomer() external view returns (GigsContractEntity[] memory contracts) {
         AppStorage storage s = LibAppStorage.appStorage();
 
-        address[] memory myContracts = s.gigsMemberContractsAsCustomer[msg.sender];
-        uint256 myContractsCount = myContracts.length;
+        if (!s.gigsCustomerExists[msg.sender]) return contracts;
+
+        GigsCustomerEntity memory customer = s.gigsCustomers[s.gigsCustomerIndexByAddress[msg.sender]];
+
+        uint256 myContractsCount = customer.myContracts.length;
 
         contracts = new GigsContractEntity[](myContractsCount);
 
         uint256 i = 0;
 
         while (i < myContractsCount) {
+            contracts[i] = s.gigsContracts[customer.myContracts[i]];
+
             unchecked {
-                contracts[i] = s.gigsContracts[myContracts[i]];
                 ++i;
             }
         }

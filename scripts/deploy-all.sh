@@ -77,6 +77,30 @@ echo "Deploying GigsGetMyApplicationsQuery..."
 npx hardhat run scripts/plugins/gigs/queries/deployGigsGetMyApplicationsQuery.js --network "${NETWORK}"
 echo ""
 
+echo "Deploying GigsGetCustomersQuery..."
+npx hardhat run scripts/plugins/gigs/queries/deployGigsGetCustomersQuery.js --network "${NETWORK}"
+echo ""
+
+echo "Deploying GigsGetFreelancersQuery..."
+npx hardhat run scripts/plugins/gigs/queries/deployGigsGetFreelancersQuery.js --network "${NETWORK}"
+echo ""
+
+echo "Deploying GigsGetCustomerQuery..."
+npx hardhat run scripts/plugins/gigs/queries/deployGigsGetCustomerQuery.js --network "${NETWORK}"
+echo ""
+
+echo "Deploying GigsGetFreelancerQuery..."
+npx hardhat run scripts/plugins/gigs/queries/deployGigsGetFreelancerQuery.js --network "${NETWORK}"
+echo ""
+
+echo "Deploying GigsGetMyCustomerProfileQuery..."
+npx hardhat run scripts/plugins/gigs/queries/deployGigsGetMyCustomerProfileQuery.js --network "${NETWORK}"
+echo ""
+
+echo "Deploying GigsGetMyFreelancerProfileQuery..."
+npx hardhat run scripts/plugins/gigs/queries/deployGigsGetMyFreelancerProfileQuery.js --network "${NETWORK}"
+echo ""
+
 echo "Deploying GigsAddJobCommand..."
 npx hardhat run scripts/plugins/gigs/commands/deployGigsAddJobCommand.js --network "${NETWORK}"
 echo ""

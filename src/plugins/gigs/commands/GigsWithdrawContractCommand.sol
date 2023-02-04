@@ -26,5 +26,7 @@ contract GigsWithdrawContractCommand is IGigsWithdrawContractCommand, GigsAbstra
         dto.status = "closed";
         dto.withdrewAt = uint64(block.timestamp); // solhint-disable-line not-rely-on-time
         dto.closedAt = uint64(block.timestamp); // solhint-disable-line not-rely-on-time
+
+        updatePersonActivity(dto.contractorAddress);
     }
 }

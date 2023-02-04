@@ -39,7 +39,7 @@ describe('CoreGetStatsQuery', async () => {
         it('returns zero values', async () => {
           const stats = await coreGetStats(coreGetStatsQuery)
 
-          expect(stats.membersCount).to.eq(0)
+          expect(stats.peopleCount).to.eq(0)
           expect(stats.nodeOwnersCount).to.eq(0)
           expect(stats.frontendNodesCount).to.eq(0)
         })
@@ -72,7 +72,7 @@ describe('CoreGetStatsQuery', async () => {
 
           const stats = await coreGetStats(coreGetStatsQuery)
 
-          expect(stats.membersCount).to.eq(0)
+          expect(stats.peopleCount).to.eq(0)
           expect(stats.nodeOwnersCount).to.eq(2)
           expect(stats.frontendNodesCount).to.eq(3)
         })

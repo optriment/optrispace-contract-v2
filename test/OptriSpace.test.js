@@ -110,6 +110,48 @@ describe('OptriSpace', async () => {
         assert.sameMembers(result, selectors)
       })
 
+      it('adds GigsGetCustomersQuery', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsGetCustomersQuery')
+
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
+
+      it('adds GigsGetFreelancersQuery', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsGetFreelancersQuery')
+
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
+
+      it('adds GigsGetCustomerQuery', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsGetCustomerQuery')
+
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
+
+      it('adds GigsGetFreelancerQuery', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsGetFreelancerQuery')
+
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
+
+      it('adds GigsGetMyCustomerProfileQuery', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsGetMyCustomerProfileQuery')
+
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
+
+      it('adds GigsGetMyFreelancerProfileQuery', async () => {
+        const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsGetMyFreelancerProfileQuery')
+
+        const result = await diamondLoupeFacet.facetFunctionSelectors(address)
+        assert.sameMembers(result, selectors)
+      })
+
       it('adds GigsAddJobCommand', async () => {
         const { selectors, address } = await deployFacet(diamondCutFacet, 'GigsAddJobCommand')
 

@@ -17,6 +17,9 @@ const {
   gigsAddContractTx,
   gigsAddApplicationTx,
   gigsGetMyApplication,
+  gigsGetCustomer,
+  gigsGetMyCustomerProfile,
+  gigsGetMyFreelancerProfile,
 } = require('../helpers')
 
 const { deployDiamond } = require('../../../../scripts/deploy.js')
@@ -524,13 +527,29 @@ describe('GigsAddContractCommand', async () => {
             })
 
             describe('when contract does not exist', async () => {
-              let optriSpace, gigsFreelancerService
+              let gigsFreelancerService,
+                gigsGetCustomerQuery,
+                gigsGetMyCustomerProfileQuery,
+                gigsGetMyFreelancerProfileQuery
 
               beforeEach(async () => {
-                optriSpace = await ethers.getContractAt('OptriSpace', diamondAddress)
-
                 await deployFacet(diamondCutFacet, 'GigsFreelancerService')
                 gigsFreelancerService = await ethers.getContractAt('GigsFreelancerService', diamondAddress)
+
+                await deployFacet(diamondCutFacet, 'GigsGetCustomerQuery')
+                gigsGetCustomerQuery = await ethers.getContractAt('GigsGetCustomerQuery', diamondAddress)
+
+                await deployFacet(diamondCutFacet, 'GigsGetMyCustomerProfileQuery')
+                gigsGetMyCustomerProfileQuery = await ethers.getContractAt(
+                  'GigsGetMyCustomerProfileQuery',
+                  diamondAddress
+                )
+
+                await deployFacet(diamondCutFacet, 'GigsGetMyFreelancerProfileQuery')
+                gigsGetMyFreelancerProfileQuery = await ethers.getContractAt(
+                  'GigsGetMyFreelancerProfileQuery',
+                  diamondAddress
+                )
               })
 
               it('adds a new contract', async () => {
@@ -581,6 +600,77 @@ describe('GigsAddContractCommand', async () => {
                 expect(exists).to.eq(true)
                 expect(dto.contractAddress).to.eq(newContractAddress)
                 expect(dto.hasContract).to.eq(true)
+              })
+
+              it('adds contract to Customer profile', async () => {
+                const tx = await gigsAddContractTx(gigsAddContractCommand, customer, {
+                  frontendNodeAddress: frontendNodeAddress,
+                  jobAddress: jobAddress,
+                  applicationAddress: applicationAddress,
+                  title: 'title',
+                  description: 'description',
+                  value: '0.01',
+                  durationInDays: 6,
+                  daysToStartWork: 5,
+                })
+
+                const newContractAddress = await getContractAddressByTransaction(tx)
+
+                const { exists, profile } = await gigsGetMyCustomerProfile(gigsGetMyCustomerProfileQuery, customer)
+                expect(exists).to.eq(true)
+                expect(profile.owner).to.eq(customer.address)
+                expect(profile.myJobs).to.eql([jobAddress])
+                expect(profile.myContracts).to.eql([newContractAddress])
+              })
+
+              it('adds contract to Freelancer profile', async () => {
+                const tx = await gigsAddContractTx(gigsAddContractCommand, customer, {
+                  frontendNodeAddress: frontendNodeAddress,
+                  jobAddress: jobAddress,
+                  applicationAddress: applicationAddress,
+                  title: 'title',
+                  description: 'description',
+                  value: '0.01',
+                  durationInDays: 6,
+                  daysToStartWork: 5,
+                })
+
+                const newContractAddress = await getContractAddressByTransaction(tx)
+
+                const { exists, profile } = await gigsGetMyFreelancerProfile(
+                  gigsGetMyFreelancerProfileQuery,
+                  freelancer
+                )
+                expect(exists).to.eq(true)
+                expect(profile.owner).to.eq(freelancer.address)
+                expect(profile.myApplications).to.eql([applicationAddress])
+                expect(profile.myContracts).to.eql([newContractAddress])
+              })
+
+              it('updates customer activity timestamp', async () => {
+                const { dto: before } = await gigsGetCustomer(gigsGetCustomerQuery, {
+                  customerAddress: customer.address,
+                })
+                expect(before.id).to.eq(customer.address)
+
+                const lastActivityAtBefore = +before.lastActivityAt
+
+                await gigsAddContract(gigsAddContractCommand, customer, {
+                  frontendNodeAddress: frontendNodeAddress,
+                  jobAddress: jobAddress,
+                  applicationAddress: applicationAddress,
+                  title: 'title',
+                  description: 'description',
+                  value: '0.01',
+                  durationInDays: 6,
+                  daysToStartWork: 5,
+                })
+
+                const { dto: after } = await gigsGetCustomer(gigsGetCustomerQuery, {
+                  customerAddress: customer.address,
+                })
+                expect(after.id).to.eq(customer.address)
+                expect(+after.lastActivityAt).to.be.above(lastActivityAtBefore)
               })
 
               it('emits event ContractCreated', async () => {
@@ -664,7 +754,7 @@ describe('GigsAddContractCommand', async () => {
 
                 const contract = await ethers.getContractAt('GigsContractContract', newContractAddress)
                 expect(await contract.version()).to.eq(1)
-                expect(await contract.deployerAddress()).to.eq(optriSpace.address)
+                expect(await contract.deployerAddress()).to.eq(diamondAddress)
                 expect(await contract.jobAddress()).to.eq(jobAddress)
                 expect(await contract.applicationAddress()).to.eq(applicationAddress)
                 expect(await contract.customerAddress()).to.eq(customer.address)

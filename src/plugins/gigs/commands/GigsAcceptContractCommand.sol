@@ -25,5 +25,7 @@ contract GigsAcceptContractCommand is IGigsAcceptContractCommand, GigsAbstractCo
 
         dto.status = "accepted";
         dto.acceptedAt = uint64(block.timestamp); // solhint-disable-line not-rely-on-time
+
+        updatePersonActivity(dto.contractorAddress);
     }
 }

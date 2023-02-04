@@ -25,5 +25,7 @@ contract GigsStartContractCommand is IGigsStartContractCommand, GigsAbstractCont
 
         dto.status = "started";
         dto.startedAt = uint64(block.timestamp); // solhint-disable-line not-rely-on-time
+
+        updatePersonActivity(dto.contractorAddress);
     }
 }

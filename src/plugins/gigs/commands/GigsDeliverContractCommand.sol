@@ -25,5 +25,7 @@ contract GigsDeliverContractCommand is IGigsDeliverContractCommand, GigsAbstract
 
         dto.status = "delivered";
         dto.deliveredAt = uint64(block.timestamp); // solhint-disable-line not-rely-on-time
+
+        updatePersonActivity(dto.contractorAddress);
     }
 }

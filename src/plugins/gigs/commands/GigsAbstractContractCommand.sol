@@ -25,4 +25,8 @@ contract GigsAbstractContractCommand {
 
         dto = s.gigsContracts[contractAddress];
     }
+
+    function updatePersonActivity(address personAddress) internal {
+        LibAppStorage.updatePersonActivity(personAddress);
+    }
 }

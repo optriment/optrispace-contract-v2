@@ -26,6 +26,8 @@ const {
   gigsWithdrawContract,
   gigsRefundContract,
   gigsGetContract,
+  gigsGetCustomer,
+  gigsGetFreelancer,
   addDaysToTimestamp,
 } = require('../helpers')
 
@@ -275,12 +277,17 @@ describe('GigsFundContractCommand', async () => {
           })
 
           describe('when contract is accepted', async () => {
-            let gigsAcceptContractCommand
+            let gigsAcceptContractCommand, gigsGetCustomerQuery, gigsGetFreelancerQuery
 
             beforeEach(async () => {
               await deployFacet(diamondCutFacet, 'GigsAcceptContractCommand')
-
               gigsAcceptContractCommand = await ethers.getContractAt('GigsAcceptContractCommand', diamondAddress)
+
+              await deployFacet(diamondCutFacet, 'GigsGetCustomerQuery')
+              gigsGetCustomerQuery = await ethers.getContractAt('GigsGetCustomerQuery', diamondAddress)
+
+              await deployFacet(diamondCutFacet, 'GigsGetFreelancerQuery')
+              gigsGetFreelancerQuery = await ethers.getContractAt('GigsGetFreelancerQuery', diamondAddress)
 
               await gigsAcceptContract(gigsAcceptContractCommand, freelancer, { contractAddress: contractAddress })
             })
@@ -390,6 +397,34 @@ describe('GigsFundContractCommand', async () => {
 
                   await snapshot.restore()
                 })
+
+                it('updates customer activity timestamp', async () => {
+                  const { dto: before } = await gigsGetCustomer(gigsGetCustomerQuery, {
+                    customerAddress: customer.address,
+                  })
+                  expect(before.id).to.eq(customer.address)
+
+                  const lastActivityAtBefore = +before.lastActivityAt
+
+                  const snapshot = await helpers.takeSnapshot()
+
+                  const delayInDays = 1
+
+                  await helpers.time.increase(delayInDays * 24 * 60 * 60)
+
+                  await gigsFundContract(gigsFundContractCommand, customer, {
+                    contractAddress: contractAddress,
+                    value: '0.03',
+                  })
+
+                  const { dto: after } = await gigsGetCustomer(gigsGetCustomerQuery, {
+                    customerAddress: customer.address,
+                  })
+                  expect(after.id).to.eq(customer.address)
+                  expect(+after.lastActivityAt).to.be.above(lastActivityAtBefore)
+
+                  await snapshot.restore()
+                })
               })
 
               it('has valid state', async () => {
@@ -486,6 +521,40 @@ describe('GigsFundContractCommand', async () => {
 
                 expect(await ethers.provider.getBalance(contractAddress)).to.eq(ethers.utils.parseEther('0.02'))
               })
+
+              it('updates customer activity timestamp', async () => {
+                const { dto: before } = await gigsGetCustomer(gigsGetCustomerQuery, {
+                  customerAddress: customer.address,
+                })
+                expect(before.id).to.eq(customer.address)
+
+                const lastActivityAtBefore = +before.lastActivityAt
+
+                await gigsFundContract(gigsFundContractCommand, customer, {
+                  contractAddress: contractAddress,
+                  value: '0.03',
+                })
+
+                const { dto: after } = await gigsGetCustomer(gigsGetCustomerQuery, {
+                  customerAddress: customer.address,
+                })
+                expect(after.id).to.eq(customer.address)
+                expect(+after.lastActivityAt).to.be.above(lastActivityAtBefore)
+              })
+
+              it('does not increase succeeded and failed contracts in Freelancer profile', async () => {
+                await gigsFundContract(gigsFundContractCommand, customer, {
+                  contractAddress: contractAddress,
+                  value: '0.03',
+                })
+
+                const { dto } = await gigsGetFreelancer(gigsGetFreelancerQuery, {
+                  freelancerAddress: freelancer.address,
+                })
+                expect(dto.id).to.eq(freelancer.address)
+                expect(dto.succeededContractsCount).to.eq(0)
+                expect(dto.failedContractsCount).to.eq(0)
+              })
             })
 
             describe('when amount is greater than contract value', async () => {
@@ -565,6 +634,26 @@ describe('GigsFundContractCommand', async () => {
                 expect(await contract.getStatus()).to.eq('funded')
 
                 expect(await ethers.provider.getBalance(contractAddress)).to.eq(ethers.utils.parseEther('0.03'))
+              })
+
+              it('updates customer activity timestamp', async () => {
+                const { dto: before } = await gigsGetCustomer(gigsGetCustomerQuery, {
+                  customerAddress: customer.address,
+                })
+                expect(before.id).to.eq(customer.address)
+
+                const lastActivityAtBefore = +before.lastActivityAt
+
+                await gigsFundContract(gigsFundContractCommand, customer, {
+                  contractAddress: contractAddress,
+                  value: '0.03',
+                })
+
+                const { dto: after } = await gigsGetCustomer(gigsGetCustomerQuery, {
+                  customerAddress: customer.address,
+                })
+                expect(after.id).to.eq(customer.address)
+                expect(+after.lastActivityAt).to.be.above(lastActivityAtBefore)
               })
             })
 

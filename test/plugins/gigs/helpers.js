@@ -165,6 +165,30 @@ const gigsGetContractsAsContractor = async (contract, as) => {
   return await contract.connect(as).gigsGetContractsAsContractor()
 }
 
+const gigsGetCustomers = async (contract) => {
+  return await contract.gigsGetCustomers()
+}
+
+const gigsGetFreelancers = async (contract) => {
+  return await contract.gigsGetFreelancers()
+}
+
+const gigsGetCustomer = async (contract, args = {}) => {
+  return await contract.gigsGetCustomer(args.customerAddress)
+}
+
+const gigsGetFreelancer = async (contract, args = {}) => {
+  return await contract.gigsGetFreelancer(args.freelancerAddress)
+}
+
+const gigsGetMyCustomerProfile = async (contract, as) => {
+  return await contract.connect(as).gigsGetMyCustomerProfile()
+}
+
+const gigsGetMyFreelancerProfile = async (contract, as) => {
+  return await contract.connect(as).gigsGetMyFreelancerProfile()
+}
+
 const addDaysToTimestamp = (timestamp, daysToAdd) => {
   return timestamp + daysToAdd * 60 * 60 * 24
 }
@@ -200,5 +224,11 @@ module.exports = {
   gigsGetJobAndApplicationForContract,
   gigsGetContractsAsCustomer,
   gigsGetContractsAsContractor,
+  gigsGetCustomers,
+  gigsGetFreelancers,
+  gigsGetCustomer,
+  gigsGetFreelancer,
+  gigsGetMyCustomerProfile,
+  gigsGetMyFreelancerProfile,
   addDaysToTimestamp,
 }

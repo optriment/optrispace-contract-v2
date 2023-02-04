@@ -6,4 +6,6 @@ struct GigsStatsValue {
     uint256 applicationsCount;
     uint256 contractsCount;
     uint256 jobsCategoriesCount;
+    uint256 customersCount;
+    uint256 freelancersCount;
 }

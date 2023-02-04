@@ -41,6 +41,8 @@ contract GigsPlugin is IGigsPlugin {
         stats.applicationsCount = s.gigsApplicationsCount;
         stats.contractsCount = s.gigsContractsCount;
         stats.jobsCategoriesCount = s.gigsJobsCategoriesCount;
+        stats.customersCount = s.gigsCustomersCount;
+        stats.freelancersCount = s.gigsFreelancersCount;
     }
 
     function gigsGetJobsCategories() external view returns (GigsJobCategoryValue[] memory categories) {
