@@ -25,6 +25,10 @@ case "$1" in
     ;;
 esac
 
+DATE=$(TZ="UTC" date -u +"%Y-%m-%dT%H:%M:%SZ")
+echo "Deployment date: ${DATE}"
+echo ""
+
 CONTRACTS_LOG=./tmp/${NETWORK}_contracts.log
 
 echo "Deploying Diamond..."

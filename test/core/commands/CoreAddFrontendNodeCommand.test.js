@@ -35,7 +35,7 @@ describe('CoreAddFrontendNodeCommand', async () => {
   beforeEach(async () => {
     ;[owner, frontendNodeOwner] = await ethers.getSigners()
 
-    diamondAddress = await deployDiamond()
+    diamondAddress = await deployDiamond('Test')
     diamondCutFacet = await ethers.getContractAt('DiamondCutFacet', diamondAddress)
   })
 

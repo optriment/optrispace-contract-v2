@@ -48,7 +48,7 @@ describe('GigsAddApplicationCommand', async () => {
   beforeEach(async () => {
     ;[owner, customer, freelancer, someone, frontendNodeOwner] = await ethers.getSigners()
 
-    diamondAddress = await deployDiamond()
+    diamondAddress = await deployDiamond('Test')
     diamondCutFacet = await ethers.getContractAt('DiamondCutFacet', diamondAddress)
   })
 

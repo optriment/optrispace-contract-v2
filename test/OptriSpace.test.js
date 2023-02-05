@@ -12,7 +12,7 @@ describe('OptriSpace', async () => {
   let ownershipFacet
 
   beforeEach(async () => {
-    diamondAddress = await deployDiamond()
+    diamondAddress = await deployDiamond('Test')
     diamondCutFacet = await ethers.getContractAt('DiamondCutFacet', diamondAddress)
     diamondLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', diamondAddress)
     ownershipFacet = await ethers.getContractAt('OwnershipFacet', diamondAddress)

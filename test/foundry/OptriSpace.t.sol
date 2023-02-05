@@ -10,10 +10,10 @@ contract OptriSpaceTest is Test {
 
     function setUp() public {
         DiamondCutFacet diamondCutFacet = new DiamondCutFacet();
-        optriSpace = new OptriSpace(address(this), address(diamondCutFacet));
+        optriSpace = new OptriSpace(address(this), address(diamondCutFacet), "Test");
     }
 
-    function test_VERSION() public {
-        assertEq(optriSpace.VERSION(), '1.0.0');
+    function test_hasReleaseName() public {
+        assertEq(optriSpace.releaseName(), "Test");
     }
 }

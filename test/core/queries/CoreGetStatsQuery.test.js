@@ -17,7 +17,7 @@ describe('CoreGetStatsQuery', async () => {
   beforeEach(async () => {
     ;[owner, frontendNodeOwner1, frontendNodeOwner2] = await ethers.getSigners()
 
-    diamondAddress = await deployDiamond()
+    diamondAddress = await deployDiamond('Test')
     diamondCutFacet = await ethers.getContractAt('DiamondCutFacet', diamondAddress)
   })
 

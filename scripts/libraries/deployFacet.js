@@ -35,7 +35,7 @@ const deployFacet = async (contractName, args = {}) => {
     throw Error(`Diamond upgrade failed: ${tx.hash}`)
   }
 
-  if (args.verbose) console.log(`${contractName} deployed`)
+  if (args.verbose) console.log(`${contractName} deployed to: ${facet.address}`)
 }
 
 exports.deployFacet = deployFacet

@@ -48,6 +48,20 @@ Please follow instructions below to install Smart Contracts locally.
    cp .env.example .env
    ```
 
+7. In a new terminal session start local blockchain node:
+
+   ```sh
+   make run_node
+   ```
+
+8. Deploy contracts to local blockchain node:
+
+   ```sh
+   make deploy_hardhat
+   ```
+
+9. Take a look into previous command output to configure your frontend repo.
+
 ## Running tests
 
 ```sh
