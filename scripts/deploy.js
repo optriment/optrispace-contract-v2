@@ -2,7 +2,11 @@
 
 const { getSelectors, FacetCutAction } = require('./libraries/diamond.js')
 
-async function deployDiamond(args = {}) {
+async function deployDiamond(releaseName, args = {}) {
+  if (typeof releaseName !== 'string' || releaseName.trim().length === 0) {
+    throw new Error('Release name must be provided')
+  }
+
   const accounts = await ethers.getSigners()
   const contractOwner = accounts[0]
 
@@ -16,7 +20,7 @@ async function deployDiamond(args = {}) {
 
   // deploy Diamond
   const Diamond = await ethers.getContractFactory('OptriSpace')
-  const diamond = await Diamond.deploy(contractOwner.address, diamondCutFacet.address)
+  const diamond = await Diamond.deploy(contractOwner.address, diamondCutFacet.address, releaseName)
   await diamond.deployed()
 
   // deploy DiamondInit
@@ -61,7 +65,7 @@ async function deployDiamond(args = {}) {
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 if (require.main === module) {
-  deployDiamond({ verbose: true }).catch((error) => {
+  deployDiamond(process.env.RELEASE_NAME, { verbose: true }).catch((error) => {
     console.error(error)
     process.exitCode = 1
   })

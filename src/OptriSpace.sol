@@ -16,11 +16,12 @@ import "./core/interfaces/IOptriSpace.sol";
 
 contract OptriSpace is IOptriSpace {
     /// Used by frontend to check is this a contract or not
-    string public constant VERSION = "1.0.0";
+    // slither-disable-next-line immutable-states
+    string public releaseName;
 
     error FunctionDoesNotExist();
 
-    constructor(address _contractOwner, address _diamondCutFacet) payable {
+    constructor(address _contractOwner, address _diamondCutFacet, string memory _releaseName) payable {
         LibDiamond.setContractOwner(_contractOwner);
 
         // Add the diamondCut external function from the diamondCutFacet
@@ -33,6 +34,8 @@ contract OptriSpace is IOptriSpace {
             functionSelectors: functionSelectors
         });
         LibDiamond.diamondCut(cut, address(0), "");
+
+        releaseName = _releaseName;
     }
 
     // Find facet for function that is called and execute the

@@ -48,6 +48,9 @@ calculate_contract_size:
 run_node:
 	@${NPX} hardhat node
 
+deploy_hardhat: # Deploy smart contracts to local blockchain node
+	@./scripts/deploy-hardhat.sh
+
 clean: # Remove old artifacts
 	@${NPX} hardhat clean
 	@rm -rf ./cache
