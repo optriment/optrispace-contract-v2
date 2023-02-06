@@ -69,7 +69,6 @@ Puppis
 Pyxis
 Reticulum
 Sagitta
-Sagittarius
 Scorpius
 Sculptor
 Scutum
