@@ -61,7 +61,7 @@
     "hardhat-gas-reporter": "^1.0.9",
     "husky": "^8.0.3",
     "prettier": "^2.8.1",
-    "prettier-plugin-solidity": "^1.1.1",
+    "prettier-plugin-solidity": "^1.1.2",
     "solhint": "^3.3.8",
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.8.2"
