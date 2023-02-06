@@ -19,6 +19,10 @@ case "$1" in
     NETWORK="bsc-testnet"
     ;;
 
+  "bsc-mainnet")
+    NETWORK="bsc-mainnet"
+    ;;
+
   *)
     echo "Unsupported network!";
     exit 1
