@@ -45,6 +45,12 @@ module.exports = {
       gasPrice: 20000000000,
       accounts: { mnemonic: mnemonic },
     },
+    'bsc-mainnet': {
+      url: 'https://bsc-dataseed.binance.org/',
+      chainId: 56,
+      gasPrice: 20000000000,
+      accounts: { mnemonic: mnemonic },
+    },
   },
   // https://www.npmjs.com/package/hardhat-gas-reporter
   gasReporter: {

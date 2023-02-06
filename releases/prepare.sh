@@ -22,6 +22,7 @@ echo ""
 
 echo "Creating release directory ${HISTORY_DIR}/${NEXT_RELEASE_NAME}..."
 mkdir -p "${HISTORY_DIR}/${NEXT_RELEASE_NAME}"
+touch "${HISTORY_DIR}/${NEXT_RELEASE_NAME}/README.md"
 
 echo "Removing ${NEXT_RELEASE_NAME} from ${AVAILABLE_NAMES}..."
 CLEAN_NAMES=$(sed "/^${NEXT_RELEASE_NAME}$/d" "$AVAILABLE_NAMES")
@@ -32,4 +33,4 @@ echo "Use the following command to deploy smart contracts:"
 echo "RELEASE_NAME=${NEXT_RELEASE_NAME} ./scripts/deploy-all.sh [localhost|bsc-testnet]"
 
 echo ""
-echo "Do not forget to save output log to ${HISTORY_DIR}/${NEXT_RELEASE_NAME}/release.log!"
+echo "Do not forget to save output log to ${HISTORY_DIR}/${NEXT_RELEASE_NAME}/README.md!"
