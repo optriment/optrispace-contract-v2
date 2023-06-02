@@ -12,7 +12,7 @@
 <h1 align="center">Brand New Platform for Freelancers and Customers</h1>
 
 <div align="center">
-  <a href="https://my.optrispace.com/" rel="dofollow"><strong>No Middlemen. No Paperwork. Fast & Secure Payments.</strong></a>
+  <a href="https://sagittarius.optrispace.com/" rel="dofollow"><strong>No Middlemen. No Paperwork. Fast & Secure Payments.</strong></a>
   <br />
   <br />
   <a href="https://discord.gg/7WEbtmuqtv">Join Our Discord</a>
